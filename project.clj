@@ -26,11 +26,11 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "1.7.219"]
+                 [org.clojure/clojurescript "1.8.51"]
 
                  [devcards "0.2.1" :exclusions [cljsjs/react]]
                  [org.clojure/test.check "0.9.0"]
-                 [org.clojure/tools.reader "0.10.0-SNAPSHOT"]
+                 [org.clojure/tools.reader "1.0.0-beta1"]
                  [com.cognitect/transit-clj "0.8.285"]
 
                  [reagent "0.5.1" :exclusions [cljsjs/react]]
