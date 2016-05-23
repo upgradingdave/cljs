@@ -7,6 +7,7 @@
               :asset-path "js/compiled/out"
               :output-to  (str compiled-js-dir "/" ns ".js")
               :optimizations :advanced
+              ;;:pseudo-names true
               ;;:optimizations :none
               }})
 

@@ -214,7 +214,7 @@
 
 (def max-thumb-size 150)
 
-(defn finish-resize [data url]
+(defn finish-resize! [data url]
   (let [{:keys [width height]} (:photo @data)
         img      (:image @data) 
         selected (:selected @data)
@@ -235,6 +235,7 @@
                       (assoc old :resized resized'))))))
 
 ;;.toDataURL canvas "image/jpg" 0.7
+
 (defn do-resize [data]
   (fn [evt] 
     (let [{:keys [width height]} (:photo @data)
@@ -243,8 +244,7 @@
       (html5/to-blob canvas
                      (fn [blob]
                        (let [url (js/URL.createObjectURL blob)]
-                         (finish-resize data url))
-                       )
+                         (finish-resize! data url)))
                      "image/jpg"
                      0.7)
       (.preventDefault evt))))
