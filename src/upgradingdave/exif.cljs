@@ -1,12 +1,19 @@
 (ns upgradingdave.exif
   (:require [reagent.core :as r]
-            [cljsjs.exif]))
+            [cljsjs.exif]
+            [upgradingdave.html5 :as html5]))
 
-(defn html5-file-api-supported? []
-  (and js/File
-       js/FileReader 
-       js/FileList 
-       js/Blob))
+(defn load-exif!
+  "Given a js File Object, parse the exif metadata. The resulting map
+  is put into the data atom"
+  [img data path & [orient? canvas-elid]]
+  (js/EXIF.getData 
+   img
+   (fn []
+     (this-as 
+      this 
+      (let [exifdata    (js->clj (.-exifdata this))]
+        (swap! data assoc-in (conj path :exif) exifdata))))))
 
 (defn image? 
   "Determine whether a js File object represents an image"
@@ -130,7 +137,7 @@
   [:div {:id "exif-editor" :class "container"}
 
    (let [supported (if (nil? supported?) 
-                     (html5-file-api-supported?) supported?)
+                     (html5/file-api-supported?) supported?)
          files (:files @data)
          images (filter image? files)
          others (filter #(not (image? %)) files)]

@@ -1,23 +1,14 @@
-(ns upgradingdave.exif_dev
+(ns upgradingdave.orientation-dev
   (:require
    [devcards.core     :as dc]
    [reagent.core      :as r]
-   [upgradingdave.exif :as exif]
+   [upgradingdave.orientation :as o]
    [upgradingdave.img :as img])
   (:require-macros
    [devcards.core :as dc :refer [defcard deftest defcard-doc]]
    [cljs.test            :refer [is testing]]))
 
 (def data (r/atom {}))
-
-(defcard 
-  "### Exif"
-  (dc/reagent 
-   (fn [data _] [exif/exif-editor data]))
-  data
-  {:inspect-data true})
-
-;;TODO: in progress
 
 (defn new-canvas []
   (doto (js/document.createElement "canvas")))
@@ -55,6 +46,15 @@
             orientation (get exifdata "Orientation")]
         (swap! data assoc-in [:orientation] orientation)
         (fix-orientation this orientation))))))
+
+(defcard 
+  "### Orientation"
+  (dc/reagent 
+   (fn [data _] 
+     (let [photo (:photo @data)]
+       [:div (img/image data [:photo1])])))
+  {:photo {:src "/i/20151117_124052.jpg" :id "photo1"}}
+  {:inspect-data true})
 
 (deftest file-api-supported
   (testing "sanity"

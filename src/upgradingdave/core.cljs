@@ -10,7 +10,9 @@
    [upgradingdave.pcf-dev        :as pcf]
    [upgradingdave.ics-dev        :as ics]
    [upgradingdave.resize-dev     :as resize]
-   [upgradingdave.tree-dev       :as tree])
+   [upgradingdave.tree-dev       :as tree]
+   [upgradingdave.common-dev     :as common]
+   [upgradingdave.orientation-dev :as orient])
   (:require-macros
    [devcards.core :as dc :refer [defcard deftest]]))
 

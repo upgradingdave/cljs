@@ -23,6 +23,7 @@ pwd:
 
 resize: 
 	./scripts/compilecljs.sh resize
+	./scripts/updateblog.sh resize
 
 tree: tree
 	./scripts/compilecljs.sh tree

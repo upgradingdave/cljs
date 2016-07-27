@@ -3,7 +3,8 @@
             [goog.date :as dt]
             [clojure.string      :as str]
             [upgradingdave.csv   :as csv]
-            [upgradingdave.html5 :as html5]))
+            [upgradingdave.html5 :as html5]
+            [upgradingdave.img   :as img]))
 
 (defn get-file-name [file]
   (if file
@@ -142,61 +143,33 @@
           (recur prev-width' prev-height' next-width' next-height' canvas ctx)
           )))))
 
-(defn resize-photo! [data height' width' display-height' display-width']
-  (swap! data (fn [old]
-                (-> old
-                    (assoc-in [:photo :height] height')
-                    (assoc-in [:photo :width]  width')
-                    (assoc-in [:photo :display-height] display-height')
-                    (assoc-in [:photo :display-width]  display-width')))))
+(defn resize-photo! [data photo']
+  (swap! data 
+         (fn [old]
+           (-> old
+               (assoc-in [:photo :height] (:height photo'))
+               (assoc-in [:photo :width]  (:width  photo'))
+               (assoc-in [:photo :display-height] (:display-height photo'))
+               (assoc-in [:photo :display-width]  (:display-width  photo'))))))
 
 (defn resize-by-percent! [data percent]
   (let [photo (:photo @data)
-        {:keys [orig-height orig-width 
-                orig-display-height 
-                orig-display-width]} photo
-        r       (/ percent 100)
-        height' (* r orig-height)
-        width'  (* r orig-width)
-        display-height' (* r orig-display-height)
-        display-width'  (* r orig-display-width)]
-    (resize-photo! data height' width' display-height' display-width')))
+        photo' (img/resize-by-percent photo percent)]
+    (resize-photo! data photo')))
 
 (defn resize-by-width! [data width]
-  (let [photo (:photo @data)
-        {:keys [orig-height orig-width 
-                orig-display-height 
-                orig-display-width]} photo
-        width (if (> width orig-width) orig-width width)
-        width (if (< width 0) 0 width)
-        r     (/ width orig-width)
-        percent (* 100 r)
-        ratio (/ orig-height orig-width)
-        width' width
-        height' (* width ratio)
-        display-height' (* r orig-display-height)
-        display-width'  (* r orig-display-width)]
+  (let [photo   (:photo @data)
+        photo'  (img/resize-by-max-width photo width)
+        percent (:percent photo')]
     (swap! data assoc-in [:zoom-slider :value] percent)
-    (resize-photo! data height' width' display-height' display-width')
-    ))
+    (resize-photo! data photo')))
 
 (defn resize-by-height! [data height]
-  (let [photo (:photo @data)
-        {:keys [orig-height orig-width 
-                orig-display-height 
-                orig-display-width]} photo
-        height (if (> height orig-height) orig-height height)
-        height (if (< height 0) 0 height)
-        r     (/ height orig-height)
-        percent (* 100 r)
-        ratio (/ orig-width orig-height)
-        height' height
-        width' (* height ratio)
-        display-height' (* r orig-display-height)
-        display-width'  (* r orig-display-width)]
+  (let [photo   (:photo @data)
+        photo'  (img/resize-by-max-height photo height)
+        percent (:percent photo')]
     (swap! data assoc-in [:zoom-slider :value] percent)
-    (resize-photo! data height' width' display-height' display-width')
-    ))
+    (resize-photo! data photo')))
 
 (defn slider-control [data]
   (let [v (or (get-in @data [:zoom-slider :value]) 100)]

@@ -6,7 +6,6 @@
        js/FileList 
        js/Blob))
 
-
 ;; toBlob polyfill from 
 ;; https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 ;; I think the cljs compiler doesn't know about toBlob, so as of May
