@@ -39,7 +39,9 @@
                  [reagent "0.5.1" :exclusions [cljsjs/react]]
                  [cljsjs/react-with-addons "0.14.7-0"]
                  [cljsjs/exif "2.1.1-1"]
-                 [cljsjs/ical "1.2.1-1"]]
+                 [cljsjs/ical "1.2.1-1"]
+
+                 [com.andrewmcveigh/cljs-time "0.4.0"]]
 
   :plugins [[lein-cljsbuild "1.1.1"]
             [lein-figwheel "0.5.0-1"]]
