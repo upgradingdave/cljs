@@ -26,17 +26,18 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "1.8.51"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha10"]
+                 [org.clojure/clojurescript "1.9.93"]
+                 [org.clojure/core.async "0.2.385"]
 
                  [devcards "0.2.1" :exclusions [cljsjs/react]]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/tools.reader "1.0.0-beta1"]
                  [com.cognitect/transit-clj "0.8.285"]
 
+                 [upgradingdave/password "0.2.2"]
                  [reagent "0.5.1" :exclusions [cljsjs/react]]
                  [cljsjs/react-with-addons "0.14.7-0"]
-
                  [cljsjs/exif "2.1.1-1"]
                  [cljsjs/ical "1.2.1-1"]]
 
