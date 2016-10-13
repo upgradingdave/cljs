@@ -86,6 +86,9 @@
                        ~(cljs-conf "resize")
                        ~(cljs-dev-conf "resize")
 
+                       ~(cljs-conf "todo")
+                       ~(cljs-dev-conf "todo")
+
                        ~(cljs-conf "tree")
                        ~(cljs-dev-conf "tree")
 

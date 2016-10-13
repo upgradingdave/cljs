@@ -12,6 +12,13 @@
    [cljs.test            :refer [is testing]]))
 
 (defcard 
+  "### Notifications"
+  (dc/reagent (fn [data _]
+                [todo/toggle-notifications data todo/notify-path]))
+  todo/data
+  {:inspect-data false})
+
+(defcard 
   "### Timer"
   (dc/reagent (fn [data _]
                 [todo/timer data todo/timer-path]))
@@ -47,6 +54,16 @@
     (is (= [0]            (vals (todo/unparse-millis 0))))
     (is (= [0 0 0 1 0]    (vals (todo/unparse-millis 1000))))
     (is (= [0 0 0 3 0]    (vals (todo/unparse-millis 3000))))
-    (is (= [0 0 5 54 600] (vals (todo/unparse-millis 354600))))))
+    (is (= [0 0 5 54 600] (vals (todo/unparse-millis 354600)))))
+
+  (testing "Notifications"
+    (is (todo/notification-supported?))
+    (is (todo/notification-permitted?))
+    (is (= "granted" (todo/notification-permission))))
+
+  (testing "Web Workers"
+    (is (not (todo/webworker?)))))
 
 (devcards.core/start-devcard-ui!)
+(if (not (todo/notification-permitted?))
+  (todo/notification-request-permission! todo/data [:notifications]))

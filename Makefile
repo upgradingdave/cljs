@@ -28,6 +28,9 @@ resize:
 tree: tree
 	./scripts/compilecljs.sh tree
 
+todo:
+	./scripts/compilecljs.sh todo
+
 clean: 
 	echo "cleaning cljs ...";\
 		lein clean

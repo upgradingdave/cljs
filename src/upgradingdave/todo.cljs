@@ -12,7 +12,7 @@
 (comment
   ;; todo
 
-  ;; able to stop and start
+  ;; notification popup
 
   ;; create task
 
@@ -20,6 +20,128 @@
 
   ;; time a task
 )
+
+(def total (* 25 duration/MINUTE_MS_))
+
+(def data (r/atom {:timer {:millis total}}))
+
+(def worker-path [:webworker])
+(def timer-path  [:timer])
+(def notify-path [:notify])
+
+;;;; Web Workers
+(defn webworker? []
+  (undefined? (.-document js/self)))
+
+(defn webworker-create [data path]
+  (let [w (js/Worker. "js/compiled/todo.js")]
+    (swap! data assoc-in (conj path :worker) w)))
+
+(defn webworker-get [data path]
+  (get-in @data (conj path :worker)))
+
+(defn webworker-post [data path val]
+  (.postMessage (webworker-get data path) val)
+  (js/console.log "posted message to worker"))
+
+(defn webworker-onreceive
+  "Here's a function for main thread to get messages from web worker"
+  [e]
+  (js/console.log "Received message from worker")
+  (js/console.log (.-data e)))
+
+(defn webworker-onmessage 
+  "Here's a function for the webworker to use to get messages from
+  main thread"
+  [e]
+  (js/console.log "Received message from main (inside worker)")
+  (js/console.log (.-data e)))
+
+;;set up listener if this is the webworker
+
+;; (if (webworker?)
+;;   (set! (.-onmessage js/self) webworker-onmessage)
+;;   (do
+;;     (when (not (webworker-get data worker-path))
+;;       (webworker-create data worker-path))
+;;     (set! (.-onmessage (webworker-get data worker-path)) webworker-onreceive)))
+
+;;;; Notifications
+
+(defn notification-supported? []
+  js/Notification)
+
+(defn notification-permission []
+  (.-permission js/Notification))
+
+(defn notification-permitted? []
+  (= "granted" (notification-permission)))
+
+(defn notification-request-permission! [data path]
+  (.requestPermission 
+   js/Notification 
+   (fn [permission]
+     (swap! data assoc-in path {:enabled true
+                                :permitted (= "granted" permission)
+                                :permission permission}))))
+
+(defn notification-enabled? [data path]
+  (get-in @data (conj path :enabled)))
+
+(defn show-notification [msg data path]
+  (let [title "Time's Up" 
+        icon  "https://pupeno.files.wordpress.com/2015/08/clojure-logo.png"
+        n (js/Notification. 
+           title 
+           (clj->js {:body msg
+                     :icon icon}))]
+    (.play (js/Audio. "http://www.wavlist.com/holidays/003/tnks-turkey.wav"))
+    (js/setTimeout #(.close n), 5000)
+    (swap! data assoc-in (conj path :active) n)))
+
+(defn notification-init! 
+  [data path]
+  (if (notification-permitted?)
+    (let [permission (notification-permission)]
+      (swap! data assoc-in path 
+             {:enabled    (get-in @data (conj path :enabled) true)
+              :permitted  (= "granted" permission)
+              :permission permission}))
+    (notification-request-permission! data path))
+  
+  ;; TODO move this
+  (add-watch data :watcher1 
+             (fn [k ref o n]
+               (let [old-completed (get-in o (conj timer-path :completed))
+                     new-completed (get-in n (conj timer-path :completed))]
+                 (when (and (not old-completed)
+                            new-completed)
+                   (show-notification "Hooray!" data notify-path))))))
+
+(defn toggle-notifications [data path]
+  (let [{:keys [enabled permitted]} (get-in @data path)]
+
+    (if (nil? enabled)
+      (notification-init! data path))
+
+    [:div {:class "btn-group"} 
+     [:button 
+      {:on-click #(swap! data assoc-in (conj path :enabled) true)
+       :class (str "btn" (if (and permitted enabled) 
+                           " btn-success" " btn-default"))
+       :disabled (if (not permitted) "disabled")} 
+      "Enable"]
+     [:button 
+      {:on-click #(swap! data assoc-in (conj path :enabled) false)
+       :class (str "btn" (if (and permitted (not enabled))
+                           " btn-danger" " btn-default"))
+       :disabled (if (not permitted) "disabled")} 
+      "Disable"]]
+
+    ))
+
+
+;;;; Timer
 
 (defn unparse-millis
   "Unparse seconds into minutes, seconds, days, hours.
@@ -42,7 +164,7 @@
        :seconds secs
        :millis  millis})))
 
-(def time-format (tf/formatter "HH:mm:ss"))
+(def time-format (tf/formatter "hh:mm a"))
 
 (defn elapse 
   "If the timer is started, calculate interval and update elapsed "
@@ -51,9 +173,10 @@
     (let [elapsed (t/interval started now)
           remain  (- millis (t/in-millis (or elapsed 0)))]
       (if (<= remain 0)
-        (-> timer-state 
-            (assoc-in [:completed] (t/now))
-            (assoc-in [:running] false))
+        (do
+          (-> timer-state 
+              (assoc-in [:completed] (t/now))
+              (assoc-in [:running] false)))
         (assoc-in timer-state [:elapsed] elapsed)))
     timer-state))
 
@@ -96,32 +219,42 @@
       (run-loop! data path)
       [:div {:id "timer"}
 
-       [:button {:on-click #(swap! data update-in path restart-timer)} 
-        (if started "Restart" "Start")]
-       
-       (if running 
-         [:button {:on-click #(swap! data update-in path pause-timer)} 
-          "Pause"])
-
-       (if (and started (not running) (not completed))
-         [:button {:on-click #(swap! data update-in path start-timer)} 
-          "Continue"])
-       
-       [:div (str "Current Time: "
-                  (tf/unparse time-format (t/to-default-time-zone now)))]
-       [:div "Time Remaining: " 
+       [:h1 
         (let [{:keys [minutes seconds hours]} 
               (unparse-millis (if elapsed (- total (t/in-millis elapsed)) 
                                   total))]
           (gstr/format "%02d:%02d:%02d" hours minutes seconds))]
+
+       [:div {:class "btn-group"}
+        [:button {:class "btn btn-primary" 
+                  :on-click #(swap! data update-in path restart-timer)} 
+         (if started "Restart" "Start")]
+        
+        [:button 
+         {:class "btn btn-default" 
+          :disabled (if (or (not started)
+                            completed) "disabled")
+          :on-click (if running 
+                      #(swap! data update-in path pause-timer)
+                      #(swap! data update-in path start-timer))} 
+         (cond 
+           
+           (and started (not running) (not completed))
+           "Continue"
+
+           :else 
+           "Pause"
+           )]]
+       
        ])))
 
-(def data (r/atom {:timer {:millis (* 1 duration/MINUTE_MS_)}}))
-(def timer-path [:timer])
-
 (defn main []
-  (if-let [node (.getElementById js/document "pwd-gen")]
-    (r/render-component [timer data timer-path] node)))
+  (if (not (webworker?))
+    (do
+      (when (not (webworker-get data worker-path))
+        (webworker-create data worker-path))
+      (if-let [node (.getElementById js/document "todo-gen")]
+        (r/render-component [timer data timer-path] node)))))
 
 (main)
 
