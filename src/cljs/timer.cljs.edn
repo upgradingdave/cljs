@@ -1,0 +1,2 @@
+{:require [up.webworkers.timer]
+ :compiler-options {:optimizations :advanced}}

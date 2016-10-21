@@ -1,0 +1,2 @@
+{:require [up.webworkers.simple]
+ :compiler-options {:optimizations :advanced}}
