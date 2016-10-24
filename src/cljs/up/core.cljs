@@ -1,27 +1,22 @@
 (ns up.core
   (:require
    [devcards.core :as dc :include-macros true]
-   ;;[sablono.core :as sab :include-macros true]
-   ;;[up.bmr-dev        :as bmr]
-   ;;[up.compiler       :as compile]
-   ;;[up.exif-dev       :as exif]
-   ;;[up.pwd-dev        :as pwd]
-   ;;[up.spec-pwd-dev   :as pass]
-   ;;[up.lattice-dev    :as lat]
-   ;;[up.pcf-dev        :as pcf]
-   ;;[up.ics-dev        :as ics]
-   ;;[up.resize-dev     :as resize]
-   ;;[up.todo-dev       :as todo]
-   [up.alerts.dev     :as alerts]
-   [up.notify.dev     :as notify]
-   [up.timers.dev     :as timer]
-   [up.todo.dev       :as todo]
-   [up.webworkers.dev :as wworker]
-   ;;[up.tree-dev       :as tree]
-   ;;[up.common-dev     :as common]
-   ;;[up.orientation-dev :as orient]
-   ;;[up.spec-form-validation-dev :as sfv]
-   )
+   [up.alerts.dev            :as alerts]
+   [up.bmr.dev               :as bmr]
+   [up.fun.euler.lattice-dev :as lat]
+   [up.fun.pcf-dev           :as pcf]
+   [up.ical.dev              :as ical]
+   [up.img.exif.dev          :as exif]
+   [up.img.orientation.dev   :as orientation]
+   [up.img.resize.dev        :as resize]
+   [up.notify.dev            :as notify]
+   [up.passwd.dev            :as pwd]
+   ;; TODO: need to fix the cljc for password gen
+   ;;[up.passwd.spec.dev     :as pass]
+   [up.timers.dev            :as timer]
+   [up.tree.dev              :as tree]
+   [up.todo.dev              :as todo]
+   [up.webworkers.dev        :as wworker])
   (:require-macros
    [devcards.core :refer [defcard deftest]]))
 

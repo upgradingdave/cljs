@@ -1,4 +1,5 @@
 (merge-env!
+ :source-paths #{"src/cljc"}
  :resource-paths #{"src/cljs" "resources/public"}
  :dependencies 
  '[[org.clojure/clojure       "1.9.0-alpha10"]
@@ -25,9 +26,6 @@
    [org.clojure/tools.nrepl "0.2.12" :scope "test"]
    [upgradingdave/boot-dave "0.1.1"  :scope "test"]
    [pandeiro/boot-http      "0.6.3"  :scope "test"]
-   
-
-
 
    [com.andrewmcveigh/cljs-time "0.4.0"]
    [upgradingdave/password      "0.2.2"]
@@ -48,11 +46,19 @@
       :license {"The MIT License (MIT)" 
                 "http://opensource.org/licenses/mit-license.php"}})
 
+(deftask webworkers 
+  "Always use advanced optimization to compile js intended to be
+  loaded inside a web worker"
+  []
+  (cljs :compiler-options {:optimizations :advanced}
+        :ids #{"timer" "wworker"}))
+
 (deftask dev
   "Sets up environment for development"
   []
   (comp
    (cider)
+   (webworkers)
    (serve :dir "target")
    (watch)
    (reload 
@@ -60,7 +66,7 @@
     :ids #{"devcards"})
    (cljs-repl)
    (cljs :compiler-options {:devcards true}
-         :ids #{"devcards" "timer" "wworker"})
+         :ids #{"devcards"})
    (target)))
 
 (deftask devcards

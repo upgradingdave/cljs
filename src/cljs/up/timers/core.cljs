@@ -36,8 +36,9 @@
        :millis  millis})))
 
 (defn calc-elapsed [total-millis elapsed-millis]
-  (unparse-millis (if elapsed (- total-millis (t/in-millis elapsed-millis)) 
-                      total-millis)))
+  (unparse-millis (if elapsed-millis 
+                    (- total-millis (t/in-millis elapsed-millis)) 
+                    total-millis)))
 
 (defn advance
   "Update internal state of timer"
