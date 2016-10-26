@@ -2,17 +2,22 @@
   (:require [up.webworkers.core :as ww]
             [cljs-time.core     :as t]
             [cljs-time.format   :as tf]
+            [cljs-time.local    :as tl]
             [goog.date.duration :as duration]))
 
-(def time-format (tf/formatter "hh:mm a"))
-(def date-time-format (tf/formatter "MM/dd/yyyy hh:mm:ss a"))
+(def time-format (tf/formatter "h:mm:ss a"))
+(def date-time-format (tf/formatter "MM/dd/yyyy h:mm:ss a"))
 
 (defn now []
   (t/now))
 
 (defn unparse [fmt dt]
   (if dt
-    (tf/unparse-local fmt dt)))
+    (tf/unparse fmt dt)))
+
+(defn unparse-local [fmt dt]
+  (if dt
+    (tf/unparse fmt (t/to-default-time-zone dt))))
 
 (defn unparse-millis
   "Unparse seconds into minutes, seconds, days, hours.
@@ -49,6 +54,7 @@
       (if (<= remain 0)
         (-> timer-state 
             (assoc-in [:now] (t/now))
+            (assoc-in [:elapsed] elapsed)
             (assoc-in [:completed] (t/now))
             (assoc-in [:running] false))
         (-> timer-state
@@ -61,14 +67,22 @@
       (assoc :now       (t/now))
       (assoc :started   nil)
       (assoc :completed nil)
-      (assoc :running   false)))
+      (assoc :running   false)
+      (assoc :millis    10000)))
 
 (defn init-timer! [data path]
-  (when-not (get-in @data (conj path :worker))
-    (ww/webworker-create data (conj path :worker) "timer.js")
-    (set! (.-onmessage (ww/webworker-get data (conj path :worker))) 
-          (fn [e] 
-            (swap! data #(advance %))))))
+  (let [worker-path (conj path :worker)
+        worker (get-in @data worker-path)]
+
+    ;; create timer
+    (swap! data update-in path init-timer)
+    
+    ;; create web worker
+    (when (not worker)
+      (let [worker (ww/webworker-create! data worker-path "timer.js")]
+        (set! (.-onmessage worker) 
+              (fn [e] 
+                (swap! data update-in path advance)))))))
 
 (defn restart-timer [timer-state]
   (-> timer-state
@@ -83,14 +97,13 @@
       (assoc :running false)))
 
 (defn pause-timer! [data path]
-  (swap! data #(pause-timer %)))
+  (swap! data update-in data path pause-timer))
 
 (defn start-timer [timer-state]
   (-> timer-state
-      (assoc :now     (t/now))
+      (assoc :started (:now timer-state))
       (assoc :running true)))
 
 (defn start-timer! [data path]
-  (swap! data #(start-timer %)))
-
+  (swap! data update-in path start-timer))
 

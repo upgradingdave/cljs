@@ -10,22 +10,39 @@
    [devcards.core :as dc :refer [defcard deftest defcard-doc]]
    [cljs.test            :refer [is testing]]))
 
-;; (defcard 
-;;   "### Timer"
-;;   (dc/reagent (fn [data _]
-;;                 [todo/timer data todo/timer-path]))
-;;   todo/data
-;;   {:inspect-data true})
+(def timer-path [:timer])
+(def data (r/atom {}))
 
-;; (defcard-doc 
-;;   "### Timer
+(defcard 
+  "### Countdown"
+  (dc/reagent (fn [data _]
+                [:div {:class "form-group"}
+                 [:div {:class "btn-group"}
+                  [:div {:class "btn btn-primary"
+                         :on-click #(timer/start-timer! data timer-path)
+                         } "Start"]]
+                 (if-let [n (get-in @data [:timer :elapsed])]
+                   [:div (:seconds (timer/unparse-millis 
+                                    (- (get-in @data [:timer :millis])
+                                       (t/in-millis n))))])]))
+  data
+  {:inspect-data true})
 
-;;   The timer just counts down from seconds found in state atom
-;; "
-;;   (dc/mkdn-pprint-source todo/timer))
+(defcard 
+  "### Clock"
+  (dc/reagent (fn [data _]
+                (let [n (get-in @data [:timer :now])]
+                  [:div (timer/unparse-local timer/time-format n)])))
+  data
+  {:inspect-data true})
 
 (deftest unit-tests
   (testing "Time and Dates"
+    (let [n (t/date-time 2016 10 25 1 31 50)]
+      (is (= "1:31:50 am" (tf/unparse timer/time-format n)))
+      (is (= "9:31:50 pm" (tf/unparse timer/time-format 
+                                      (t/to-default-time-zone n))))
+      (is (= "9:31:50 pm" (timer/unparse-local timer/time-format n))))
     (is (t/date? (t/now)))
     (is (t/date? (t/date-time 2016 8 10)))
     (is (= 0  (t/second (t/date-time 2016 8 10))))
@@ -48,4 +65,5 @@
     (is (= [0 0 0 3 0]    (vals (timer/unparse-millis 3000))))
     (is (= [0 0 5 54 600] (vals (timer/unparse-millis 354600))))))
 
-(defn main [])
+(defn main []
+  (timer/init-timer! data timer-path))

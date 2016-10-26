@@ -3,7 +3,7 @@
 (defn webworker? []
   (undefined? (.-document js/self)))
 
-(defn webworker-create [data path script-path]
+(defn webworker-create! [data path script-path]
   (let [w (js/Worker. script-path)]
     (swap! data assoc-in path w)
     w))

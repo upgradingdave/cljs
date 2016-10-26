@@ -26,10 +26,12 @@
   (enable-console-print!)
   (dc/start-devcard-ui!)
   (wworker/main)
-  (notify/main))
+  (notify/main)
+  (timer/main))
 
 ;; This is used in :on-jsload in boot-reload configuration in
 ;; build.boot
 (defn reload []
   (wworker/main)
-  (notify/main))
+  (notify/main)
+  (timer/main))

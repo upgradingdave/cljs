@@ -11,44 +11,55 @@
 (def ex1 (r/atom {}))
 
 (defcard 
+  "### Dismissable Alerts"
+  (dc/reagent (fn [data _]
+                (let [path (conj alerts-path :ex5)]
+                  [:div
+                   [:div {:class "form-group"}
+                    [:div {:class "btn btn-primary"
+                           :on-click #(a/open data path)}
+                     "Click Me"]]
+                   [a/dismissable data path
+                    [:div [:strong "Heads up:"] 
+                     "  Dismissable Alerts Work"]
+                    {:class "alert-warning"}]])))
+  ex1
+  {:inspect-data true})
+
+(defcard 
   "### Success"
   (dc/reagent (fn [data _]
-                [a/alert data alerts-path "ex1" {:class "alert-success"} 
-                 [:div [:strong "Awesome!"] " Success Alerts Work"] ]))
+                [a/alert "ex1"
+                 [:div [:strong "Awesome!"] " Success Alerts Work"]
+                 {:class "alert-success"} ]))
   ex1
   {:inspect-data false})
 
 (defcard 
   "### Info"
   (dc/reagent (fn [data _]
-                [a/alert data alerts-path "ex2" {:class "alert-info"} 
-                 [:div [:strong "Cool."] " Info Alerts Work"] ]))
+                [a/alert "ex2"
+                 [:div [:strong "Cool."] " Info Alerts Work"]
+                 {:class "alert-info"} ]))
   ex1
   {:inspect-data false})
 
 (defcard 
   "### Warning"
   (dc/reagent (fn [data _]
-                [a/alert data alerts-path "ex3" {:class "alert-warning"} 
-                 [:div [:strong "Hmm ..."] " Warning Alerts Work"] ]))
+                [a/alert "ex3" 
+                 [:div [:strong "Hmm ..."] " Warning Alerts Work"]
+                 {:class "alert-warning"}]))
   ex1
   {:inspect-data false})
 
 (defcard 
   "### Danger"
   (dc/reagent (fn [data _]
-                [a/alert data alerts-path "ex4" {:class "alert-danger"} 
-                 [:div [:strong "Yikes!"] " Danger Alerts Work"] ]))
+                [a/alert "ex4" 
+                 [:div [:strong "Yikes!"] " Danger Alerts Work"]
+                 {:class "alert-danger"}  ]))
   ex1
   {:inspect-data false})
-
-(defcard 
-  "### Danger"
-  (dc/reagent (fn [data _]
-                [a/dismissable data alerts-path "ex5" {:class "alert-warning"} 
-                 [:div [:strong "Heads up:"] 
-                  " Dismissable Alerts Work, too"] ]))
-  ex1
-  {:inspect-data true})
 
 

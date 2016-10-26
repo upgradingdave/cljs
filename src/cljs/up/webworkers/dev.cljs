@@ -2,6 +2,7 @@
   (:require
    [devcards.core :as dc :include-macros true]
    [reagent.core  :as reagent]
+   [up.alerts.core       :as a]
    [up.timers.core       :as t]
    [up.webworkers.core   :as ww]
    [up.webworkers.timer  :as tw])
@@ -17,18 +18,29 @@
 (defcard 
   "### Javascript Web Worker"
   (dc/reagent (fn [data _]
-                [:div [:button {:class "btn btn-primary"
-                                :on-click #(ww/webworker-post data ww-path "")} 
-                       "Run Web Worker"]]))
+                [:div
+                 [:div {:class "form-group"}
+                  [:div [:button 
+                         {:class "btn btn-primary"
+                          :on-click #(ww/webworker-post data ww-path "")}
+                         "Run Web Worker"]]]
+                 [a/dismissable data [:alerts] "js-ww-alert" 
+                  (get-in @data [:result :js]) ]
+                 ]))
   ex1
   {:inspect-data true})
 
 (defcard 
   "### Clojurescript Web Worker"
   (dc/reagent (fn [data _]
-                [:div [:button {:class "btn btn-primary"
-                                :on-click #(ww/webworker-post data ww-path "")} 
-                       "Run Web Worker"]]))
+                [:div {:class "form-group"}
+                 [:div [:button 
+                        {:class "btn btn-primary"
+                         :on-click #(ww/webworker-post data ww-path "")} 
+                        "Run Web Worker"]]
+                 [a/dismissable data [:alerts] "cljs-ww-alert"
+                  (get-in @data [:result :cljs])]
+                 ]))
   ex2
   {:inspect-data true})
 
@@ -44,12 +56,13 @@
   (testing "Web Workers"
     (is (not (ww/webworker?)))))
 
-(defn log-event [e]
-  (js/console.log (.-data e)))
+(defn show-event [data path]
+  (fn [e]
+    (swap! data assoc-in path (.-data e))))
 
 (defn init  [data script-path event-handle]
   (js/console.log "Starting web worker ...")
-  (ww/webworker-create data ww-path script-path)
+  (ww/webworker-create! data ww-path script-path)
   (js/console.log "Registering web worker listener ...")
   (set! (.-onmessage (ww/webworker-get data ww-path)) event-handle)
   (set! (.-onerror (ww/webworker-get data ww-path)) 
@@ -58,8 +71,8 @@
   (js/console.log "Web worker is ready."))
 
 (defn main []
-  (init ex1 "webworker.js" log-event)
-  (init ex2 "wworker.js" log-event)
+  (init ex1 "webworker.js" (show-event ex1 [:result :js]))
+  (init ex2 "wworker.js" (show-event ex2 [:result :cljs]))
   (init ex3 "timer.js" 
         (fn [e] 
           (swap! ex3 assoc-in [:timer] (t/advance (get-in ex3 [:timer]))))))
