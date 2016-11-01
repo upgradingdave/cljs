@@ -1,0 +1,3 @@
+{:require [up.notify.example]
+ :init-fns [up.notify.example/main]
+ :compiler-options {:optimizations :advanced}}

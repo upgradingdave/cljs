@@ -1,0 +1,4 @@
+{:require [up.notify.dev]
+ :init-fns [up.notify.dev/main]
+ :compiler-options {:devcards true
+                    :optimizations :advanced}}

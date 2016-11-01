@@ -1,0 +1,4 @@
+{:require [up.core]
+ :init-fns [up.core/main]
+ :compiler-options {:devcards true
+                    :optimizations :advanced}}

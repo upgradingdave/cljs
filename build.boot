@@ -1,6 +1,8 @@
 (merge-env!
- :source-paths #{"src/cljc"}
- :resource-paths #{"src/cljs" "resources/public"}
+ :source-paths #{"src/cljs" "src/clj"
+                 ;;"src/cljc" cljc is in progress
+                 }
+ :resource-paths #{"resources"}
  :dependencies 
  '[[org.clojure/clojure       "1.9.0-alpha10"]
    [org.clojure/clojurescript "1.9.229"]
@@ -31,7 +33,12 @@
    [upgradingdave/password      "0.2.2"]
 
    [cljsjs/exif "2.1.1-1"]
-   [cljsjs/ical "1.2.1-1"]])
+   [cljsjs/ical "1.2.1-1"]
+
+   [compojure "1.5.1"]
+   [hiccup "1.0.5"]
+
+   ])
 
 (require '[adzerk.boot-cljs             :refer [cljs]]
          '[adzerk.boot-cljs-repl        :refer [cljs-repl start-repl]]
@@ -50,8 +57,29 @@
   "Always use advanced optimization to compile js intended to be
   loaded inside a web worker"
   []
-  (cljs :compiler-options {:optimizations :advanced}
-        :ids #{"timer" "wworker"}))
+  (comp
+   (cljs :compiler-options {:optimizations :advanced}
+         :ids #{"public/js/compiled/webworkers/simple"
+                "public/js/compiled/webworkers/timer"})
+   (target)))
+
+(deftask notifications
+  "Build advanced compiled versions of notifications examples"
+  []
+  (comp
+   (cljs :ids #{"public/js/compiled/notify"
+                "public/js/compiled/notify_dev"})
+   (target)
+   (serve :handler 'up.http.core/notify-handler :reload true)
+   (wait)))
+
+(deftask devcards
+  "Build advanced compiled versions of notifications examples"
+  []
+  (comp
+   (cljs :compiler-options {:optimizations :none}
+         :ids #{"public/js/compiled/devcards"})
+   (target)))
 
 (deftask dev
   "Sets up environment for development"
@@ -59,28 +87,11 @@
   (comp
    (cider)
    (webworkers)
-   (serve :dir "target")
+   (serve :handler 'up.http.core/handler :reload false)
    (watch)
+   (cljs :ids #{"public/js/devcards"})
    (reload 
     :on-jsload 'up.core/reload
-    :ids #{"devcards"})
-   (cljs-repl)
-   (cljs :compiler-options {:devcards true}
-         :ids #{"devcards"})
-   (target)))
-
-(deftask devcards
-  "Create self contained js files for each individual dev card"
-  []
-  (comp
-   (serve :dir "target")
-   (watch)
-   (cljs :compiler-options {:devcards true
-                            :optimizations :advanced}
-         :ids #{"notifydev"})))
-
-(deftask build []
-  (comp
-   (cljs :ids #{"notifydev"} 
-         :optimizations :advanced)
+    :ids #{"public/js/devcards"})
+   ;;(cljs-repl)
    (target)))

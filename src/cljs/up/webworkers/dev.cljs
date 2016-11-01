@@ -71,8 +71,9 @@
   (js/console.log "Web worker is ready."))
 
 (defn main []
-  (init ex1 "webworker.js" (show-event ex1 [:result :js]))
-  (init ex2 "wworker.js" (show-event ex2 [:result :cljs]))
-  (init ex3 "timer.js" 
+  (init ex1 "/js/webworker.js" (show-event ex1 [:result :js]))
+  (init ex2 "/js/compiled/webworkers/simple.js" 
+        (show-event ex2 [:result :cljs]))
+  (init ex3 "/js/compiled/webworkers/timer.js" 
         (fn [e] 
           (swap! ex3 assoc-in [:timer] (t/advance (get-in ex3 [:timer]))))))
