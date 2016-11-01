@@ -1,7 +1,7 @@
 (ns up.textbox
   (:require #?(:clj  [clojure.spec       :as s]
                :cljs [cljs.spec          :as s])
-            [ud.form :as f]))
+            [up.form :as f]))
 
 (defn text-change! 
   "Check new text input value against a spec and updates state
@@ -17,6 +17,18 @@
          (swap! data assoc-in (conj path :valid) false)
          (swap! data assoc-in (conj path :error) 
                 (s/explain-data spec new-val))))))
+
+(defn problems [error]
+  ;; TODO!
+  )
+
+(defn known-problems [problems]
+  ;; TODO! 
+  )
+
+(defn problems-list [errors]
+  ;; TODO!
+  )
 
 ;; the first param should be a pair of [root-atom path]
 ;; and the value of which should be a field

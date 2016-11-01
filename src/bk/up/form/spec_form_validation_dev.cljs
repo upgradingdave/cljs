@@ -1,8 +1,8 @@
 (ns up.form.spec-form-validation-dev
   (:require
-   [devcards.core            :as dc]
-   [reagent.core             :as r]
-   [up.spec-form-validation :as sfv])
+   [devcards.core                :as dc]
+   [reagent.core                 :as r]
+   [up.form.spec-form-validation :as sfv])
   (:require-macros
    [devcards.core :as dc :refer [defcard deftest defcard-doc]]
    [cljs.test            :refer [is testing]]))

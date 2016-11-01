@@ -1,7 +1,7 @@
 (ns up.form.spec-form-validation
   (:require [reagent.core       :as r]
             [cljs.spec          :as s]
-            [ud.form            :as f]))
+            [up.form            :as f]))
 
 (def css-transition-group
   (r/adapt-react-class js/React.addons.CSSTransitionGroup))
@@ -159,9 +159,9 @@
 ;;            ])
 ;;         )})))
 
-(defn main []
-  (if-let [node (.getElementById js/document "spec-form")]
-    (r/render-component [my-form data] node)))
+;; (defn main []
+;;   (if-let [node (.getElementById js/document "spec-form")]
+;;     (r/render-component [my-form data] node)))
 
-(main)
+;; (main)
 

@@ -1,3 +1,0 @@
-{:require [up.core]
- :compiler-options {:devcards true}
- :init-fns [up.core/main]}
