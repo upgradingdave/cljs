@@ -4,7 +4,7 @@
                  }
  :resource-paths #{"resources"}
  :dependencies 
- '[[org.clojure/clojure       "1.9.0-alpha10"]
+ '[[org.clojure/clojure       "1.9.0-alpha14"]
    [org.clojure/clojurescript "1.9.229"]
    [org.clojure/core.async    "0.2.385"]
 
