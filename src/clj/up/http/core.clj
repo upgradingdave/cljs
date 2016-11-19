@@ -31,7 +31,7 @@
 
 (defn main-routes []
   (routes 
-   (GET "/" [] (js-widget "devcards" "/js/devcards.js"))
+   (GET "/" [] (page (js-widget "devcards" "/js/devcards.js")))
    default-routes))
 
 (def handler

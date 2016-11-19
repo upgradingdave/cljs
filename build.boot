@@ -85,13 +85,14 @@
   "Sets up environment for development"
   []
   (comp
+   ;;(serve :handler 'up.http.core/handler :reload false)
+   (serve)
    (cider)
    (webworkers)
-   (serve :handler 'up.http.core/handler :reload false)
+
    (watch)
-   (cljs :ids #{"public/js/devcards"})
    (reload 
     :on-jsload 'up.core/reload
     :ids #{"public/js/devcards"})
-   ;;(cljs-repl)
-   (target)))
+   (cljs :ids #{"public/js/devcards"})
+   ))

@@ -3,6 +3,7 @@
             [cljs-time.core     :as t]
             [cljs-time.format   :as tf]
             [cljs-time.local    :as tl]
+            [cljs-time.coerce   :as tc]
             [goog.date.duration :as duration]))
 
 (def time-format (tf/formatter "h:mm:ss a"))
@@ -10,6 +11,9 @@
 
 (defn now []
   (t/now))
+
+(defn now-in-millis []
+  (tc/to-long (t/now)))
 
 (defn unparse [fmt dt]
   (if dt

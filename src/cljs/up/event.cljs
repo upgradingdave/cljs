@@ -3,6 +3,7 @@
 (defn prevent-default [evt]
   (.preventDefault evt))
 
-(defn on-change! [data path]
-  (fn [e]
-    (swap! data assoc-in path (.-value (.-target e)))))
+;; deprecated
+(defn on-change! [data path] (fn [e] (swap! data assoc-in (conj path :value) 
+                                            (.-value (.-target e)))))
+
