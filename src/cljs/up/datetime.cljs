@@ -1,5 +1,6 @@
 (ns up.datetime
-  (:require [cljs-time.core     :as t]
+  (:require [up.common          :refer [o->map]] 
+            [cljs-time.core     :as t]
             [cljs-time.format   :as tf]
             ;;[cljs-time.local    :as tl]
             [cljs-time.coerce   :as tc]
@@ -11,9 +12,11 @@
 
 (def time-format (tf/formatter "h:mm:ss a"))
 (def date-time-format (tf/formatter "MM/dd/yyyy h:mm:ss a"))
+(def iso-8601-format (tf/formatters :basic-date-time))
 
 (defn same-date? [d1 d2]
-  (= (tc/to-local-date d1) (tc/to-local-date d2)))
+  (= (o->map d1) 
+     (o->map d2)))
 
 (defn now []
   (t/now))
@@ -34,6 +37,10 @@
 (defn unparse-local [fmt dt]
   (if dt
     (tf/unparse fmt (t/to-default-time-zone dt))))
+
+(defn parse [fmt dt]
+  (if dt
+    (tf/parse fmt dt)))
 
 (defn unparse-millis
   "Unparse seconds into minutes, seconds, days, hours.

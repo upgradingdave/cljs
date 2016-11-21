@@ -1,62 +1,13 @@
 (ns up.timers.core
   (:require [up.webworkers.core :as ww]
+            [up.datetime        :refer [unparse-millis unparse-local]]
+            [up.common          :refer [o->map]]
             [cljs-time.core     :as t]
             [cljs-time.format   :as tf]
             [cljs-time.local    :as tl]
             [cljs-time.coerce   :as tc]
             [cljs-time.predicates :as tp]
             [goog.date.duration :as duration]))
-
-;; TODO: I moved this to time.cljs, it can be removed
-
-(def time-format (tf/formatter "h:mm:ss a"))
-(def date-time-format (tf/formatter "MM/dd/yyyy h:mm:ss a"))
-
-(defn same-date? [d1 d2]
-  (= (tc/to-local-date d1) (tc/to-local-date d2)))
-
-(defn now []
-  (t/now))
-
-(defn to-millis [dt]
-  (tc/to-long dt))
-
-(defn now-in-millis []
-  (to-millis (t/now)))
-
-(defn from-millis [millis]
-  (tc/from-long millis))
-
-(defn unparse [fmt dt]
-  (if dt
-    (tf/unparse fmt dt)))
-
-(defn unparse-local [fmt dt]
-  (if dt
-    (tf/unparse fmt (t/to-default-time-zone dt))))
-
-(defn unparse-millis
-  "Unparse seconds into minutes, seconds, days, hours.
-  `goog.date.duration.format` almost does what I needed, but it doesn't
-  provide seconds"
-  [millis]
-  (if (<= millis 0) 
-    {:seconds 0}
-    (let [days   (js/Math.floor (/ millis duration/DAY_MS_))
-          millis (mod millis duration/DAY_MS_)
-          hours  (js/Math.floor (/ millis duration/HOUR_MS_))
-          millis (mod millis duration/HOUR_MS_)
-          mins   (js/Math.floor (/ millis duration/MINUTE_MS_))
-          millis (mod millis duration/MINUTE_MS_)
-          secs   (js/Math.floor (/ millis 1000))
-          millis (mod millis 1000)]
-      {:days    days
-       :hours   hours
-       :minutes mins
-       :seconds secs
-       :millis  millis})))
-
-;; /TODO REMOVE
 
 (defn calc-elapsed [total-millis elapsed-millis]
   (unparse-millis (if elapsed-millis 

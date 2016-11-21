@@ -1,7 +1,8 @@
 (ns up.todo.core
   (:require
    [reagent.core       :as r]
-   [up.timers.core     :as t]
+   [up.datetime        :as t]
+   [up.timers.core     :as timer]
    [goog.date.duration :as duration]
    [goog.string        :as gstr]
    [goog.string.format]))
@@ -31,12 +32,12 @@
     [:div {:id "timer"}
      [:h1 
       (let [{:keys [minutes seconds hours]} 
-            (t/calc-elapsed elapsed total)]
+            (timer/calc-elapsed elapsed total)]
         (gstr/format "%02d:%02d:%02d" hours minutes seconds))]
 
      [:div {:class "btn-group"}
       [:button {:class "btn btn-primary" 
-                :on-click #(swap! data update-in path t/restart-timer)} 
+                :on-click #(swap! data update-in path timer/restart-timer)} 
        (if started "Restart" "Start")]
       
       [:button 
@@ -44,8 +45,8 @@
         :disabled (if (or (not started)
                           completed) "disabled")
         :on-click (if running 
-                    #(swap! data update-in path t/pause-timer)
-                    #(swap! data update-in path t/start-timer))} 
+                    #(swap! data update-in path timer/pause-timer)
+                    #(swap! data update-in path timer/start-timer))} 
        (cond 
          
          (and started (not running) (not completed))

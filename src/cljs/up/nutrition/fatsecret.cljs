@@ -1,6 +1,6 @@
 (ns up.nutrition.fatsecret
-  (:require [up.timers.core :as t]
-            [goog.crypt :as c])
+  (:require [up.datetime :as t]
+            [goog.crypt  :as c])
   (:import [goog.crypt Hmac Sha1]))
 
 (def api-url "http://platform.fatsecret.com/rest/server.api")
