@@ -42,7 +42,11 @@
       (is (= "1:31:50 am" (tf/unparse timer/time-format n)))
       (is (= "9:31:50 pm" (tf/unparse timer/time-format 
                                       (t/to-default-time-zone n))))
-      (is (= "9:31:50 pm" (timer/unparse-local timer/time-format n))))
+      (is (= "9:31:50 pm" (timer/unparse-local timer/time-format n)))
+      (is (= 1477359110000 (timer/to-millis n)))
+      ;;TODO: Why doesn't this work?
+      (is (timer/same-date? n (timer/from-millis (timer/to-millis n))))
+      )
     (is (t/date? (t/now)))
     (is (t/date? (t/date-time 2016 8 10)))
     (is (= 0  (t/second (t/date-time 2016 8 10))))

@@ -1,0 +1,4 @@
+{:require [up.bingo.devcards]
+ :compiler-options {:devcards true
+                    :asset-path "public/js/bingo.out"}
+ :init-fns [up.bingo.devcards/main]}

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="/public/css/bingo.css" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+    <script src="https://www.gstatic.com/firebasejs/3.6.1/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+      apiKey: "AIzaSyBPKiAzl76kiEUeHmQ9to2rJoV8-PTd9Hw",
+      authDomain: "clojure-bingo.firebaseapp.com",
+      databaseURL: "https://clojure-bingo.firebaseio.com",
+      storageBucket: "clojure-bingo.appspot.com",
+      messagingSenderId: "505679137895"
+      };
+      firebase.initializeApp(config);
+    </script>
+    <script src="/public/js/bingo.js" type="text/javascript"></script>
+  </body>
+</html>

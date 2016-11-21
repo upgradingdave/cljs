@@ -2,6 +2,7 @@
   (:require
    [devcards.core :as dc :include-macros true]
    [up.alerts.dev            :as alerts]
+   [up.cookies.dev           :as cookies]
    ;;removed: [up.bmr.dev               :as bmr]
    [up.health.dev            :as health]
    [up.fun.euler.lattice-dev :as lat]
@@ -31,11 +32,13 @@
   (dc/start-devcard-ui!)
   ;;(wworker/main)
   (notify/main)
-  (timer/main))
+  (timer/main)
+  (cookies/main))
 
 ;; This is used in :on-jsload in boot-reload configuration in
 ;; build.boot
 (defn reload []
   ;;(wworker/main)
   (notify/main)
-  (timer/main))
+  (timer/main)
+  (cookies/main))

@@ -38,6 +38,8 @@
    [compojure "1.5.1"]
    [hiccup "1.0.5"]
 
+   [cljsjs/aws-sdk-js "2.2.41-2"]
+
    ])
 
 (require '[adzerk.boot-cljs             :refer [cljs]]
@@ -85,6 +87,8 @@
   "Sets up environment for development"
   []
   (comp
+   ;; Serving static index.html seems to work a lot better than
+   ;; using backend ring for some reason
    ;;(serve :handler 'up.http.core/handler :reload false)
    (serve)
    (cider)
@@ -95,4 +99,17 @@
     :on-jsload 'up.core/reload
     :ids #{"public/js/devcards"})
    (cljs :ids #{"public/js/devcards"})
+   ))
+
+(deftask bingo
+  "Sets up environment for clojure bingo"
+  []
+  (comp
+   (serve)
+   (cider)
+   (watch)
+   (reload 
+    :on-jsload 'up.bingo.devcards/reload
+    :ids #{"public/js/bingo"})
+   (cljs :ids #{"public/js/bingo"})
    ))

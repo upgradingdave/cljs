@@ -4,16 +4,28 @@
             [cljs-time.format   :as tf]
             [cljs-time.local    :as tl]
             [cljs-time.coerce   :as tc]
+            [cljs-time.predicates :as tp]
             [goog.date.duration :as duration]))
+
+;; TODO: I moved this to time.cljs, it can be removed
 
 (def time-format (tf/formatter "h:mm:ss a"))
 (def date-time-format (tf/formatter "MM/dd/yyyy h:mm:ss a"))
 
+(defn same-date? [d1 d2]
+  (= (tc/to-local-date d1) (tc/to-local-date d2)))
+
 (defn now []
   (t/now))
 
+(defn to-millis [dt]
+  (tc/to-long dt))
+
 (defn now-in-millis []
-  (tc/to-long (t/now)))
+  (to-millis (t/now)))
+
+(defn from-millis [millis]
+  (tc/from-long millis))
 
 (defn unparse [fmt dt]
   (if dt
@@ -43,6 +55,8 @@
        :minutes mins
        :seconds secs
        :millis  millis})))
+
+;; /TODO REMOVE
 
 (defn calc-elapsed [total-millis elapsed-millis]
   (unparse-millis (if elapsed-millis 
