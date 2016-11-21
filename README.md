@@ -28,9 +28,17 @@ Secret Access Key: UBtdT4Bk1k5vLS4SWvzYn5XF8/wOYIFJDP3rOs8M
 
 - DONE! Save state of board to db
 
+- DONE! Basic Error Handling
+  :error key is populated whenever there's an error
+
 - Able to see other "leader" User's Boards
 
+- Implement Score
+
+- Implement Invitations
+
 - Make the cells flip
+
 - Use "retro" css styles
 https://www.google.com/search?q=retro+bingo&espv=2&biw=1430&bih=689&tbm=isch&source=lnms&sa=X&ved=0ahUKEwjYibmk7LXQAhVF7CYKHUWOBEgQ_AUIBigB#tbm=isch&q=bingo+card&imgrc=9xe5V1jUmkuN3M%3A
 

@@ -5,6 +5,10 @@
             [cljs-time.coerce   :as tc]
             [goog.date.duration :as duration]))
 
+;; ISO 8601 Time format is preferred way to store dates
+;; ex: 2016-11-21T07:39:37-05:00
+;;(def built-in-formatter (formatters :basic-date-time))
+
 (def time-format (tf/formatter "h:mm:ss a"))
 (def date-time-format (tf/formatter "MM/dd/yyyy h:mm:ss a"))
 

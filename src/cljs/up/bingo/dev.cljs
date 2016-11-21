@@ -53,17 +53,16 @@
       [:div.btn.btn-primary 
        {:on-click 
         #(go 
-           (swap! data assoc :result 
-                  (<!
-                   (aws/<run aws/put-item 
-                             {:sessionid "test" 
-                              :score 0
-                              :board (b/make-board 
-                                      (take 5 b/possible))}))))}
+           (let [res (<! (aws/<run aws/put-item 
+                                   {:sessionid "test" 
+                                    :score 0
+                                    :board (b/make-board 
+                                            (take 5 b/possible))}))]
+             (swap! data assoc :result res)))}
        "Put Item"]
       [:div.btn.btn-primary 
-       {:on-click #(go (swap! data assoc :result 
-                              (<! (aws/<run aws/get-item "test"))))}
+       {:on-click #(go (let [res (<! (aws/<run aws/get-item "test"))] 
+                         (swap! data assoc :result res)))}
        "Get Item"]]))
   (r/atom {})
   {:inspect-data true})

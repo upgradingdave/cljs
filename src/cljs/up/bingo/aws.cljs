@@ -56,17 +56,26 @@
                               (first r)
                               (into {} r))) x)) m)))
 
+(defn empty-or-nil? [data]
+  (or (nil? data)
+      (undefined? data)
+      (empty? (js->clj data))))
+
+(defn error->map
+  [x]
+  (into {} (for [k (.keys js/Object x)] [k (aget x k)])))
+
 (defn <run
   "Inspired by http://www.lispcast.com/core-async-code-style"
   [f & args]
   (let [c (chan)
         cb (fn [err data]
-             (if (or (nil? data)
-                     (undefined? data)
-                     (empty? (js->clj data)))
-               (close! c)
-               ;; TODO extract this transformation into own function?
-               (put! c (db->clj (keywordize data)))))]
+             (js/console.log "handling response")
+             (if err 
+               (put! c {:error (error->map err)})
+               (if (not (empty-or-nil? data))
+                 (put! c (db->clj (keywordize data)))
+                 (close! c))))]
     (apply f (concat args [cb]))
     c))
 
@@ -78,7 +87,7 @@
             cb))
 
 (defn get-item [sessionid cb]
-  (js/console.log "ATTEMPTING GET" (pr-str sessionid))
+  ;;(js/console.log "ATTEMPTING GET" (pr-str sessionid))
   (.getItem db 
             (clj->js {:TableName "bingo.cards"
                       :Key {:sessionid {:S sessionid}}}) 

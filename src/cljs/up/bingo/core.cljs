@@ -37,7 +37,6 @@
 ;; Session Management
 
 (defn new-session []
-  (js/console.log "NEW SESSSION")
   {:sessionid (str (random-uuid))
    :timestamp (dt/now-in-millis)})
 
@@ -136,12 +135,13 @@
 
   ;; Try to load board from db. If no board, then create one
   (go (let [sessionid (:sessionid (get-session !state bingo-path)) 
-            
-            [_ {:keys [sessionid score board]}] 
-            (<! (aws/<run aws/get-item sessionid))
-
-            board (or board (new-board))]
-        (js/console.log "BOARD" board)
+            res (<! (aws/<run aws/get-item sessionid))
+            err (:error res)
+            ;; if successful, get the board from response, otherwise
+            ;; new board
+            board (or (second (:board res)) (new-board))]
+        (when err
+          (swap! !state assoc-in (conj bingo-path :error) err))
         (save-board! !state bingo-path board))))
 
 ;; /State
