@@ -4,7 +4,8 @@
    [reagent.core        :as r]
    [up.bingo.core       :as b]
    [up.bingo.components :as c]
-   [up.bingo.css        :as css])
+   [up.bingo.css        :as css]
+   [up.bingo.dev.data   :as d])
   (:require-macros
    [devcards.core :refer [defcard deftest defcard-doc]]
    [cljs.test            :refer [is testing]]))
@@ -41,7 +42,7 @@
                                     :cell-height 35
                                     :font-size   5
                                     :gutter-size 2})))
-  (r/atom {:bingo {:board (b/make-board (take 25 b/possible))}})
+  (r/atom {:bingo {:board (b/make-board (take 25 d/words))}})
   {:inspect-data false})
 
 (defcard 
@@ -52,7 +53,7 @@
                                     :cell-height 75
                                     :font-size   10
                                     :gutter-size 5})))
-  (r/atom {:bingo {:board (b/make-board (take 25 b/possible))}})
+  (r/atom {:bingo {:board (b/make-board (take 25 d/words))}})
   {:inspect-data false})
 
 (defcard 
@@ -60,7 +61,7 @@
   (dc/reagent 
    (fn [data _]
      (c/board data [:bingo :board])))
-  (r/atom {:bingo {:board (b/make-board (take 25 b/possible))}})
+  (r/atom {:bingo {:board (b/make-board (take 25 d/words))}})
   {:inspect-data false})
 
 (defcard 
@@ -74,9 +75,9 @@
   (r/atom {:bingo 
            {:players 
             {:boards 
-             [{:board (b/make-board (take 25 (shuffle b/possible)))}
-              {:board (b/make-board (take 25 (shuffle b/possible)))}
-              {:board (b/make-board (take 25 (shuffle b/possible)))}]}}})
+             [{:board (b/make-board (take 25 (shuffle d/words)))}
+              {:board (b/make-board (take 25 (shuffle d/words)))}
+              {:board (b/make-board (take 25 (shuffle d/words)))}]}}})
   {:inspect-data false})
 
 (defcard 

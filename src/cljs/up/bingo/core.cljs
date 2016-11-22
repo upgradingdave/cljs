@@ -7,40 +7,6 @@
             [up.cookies.core :as c]
             [cljs.core.async :refer [put! chan <! >! close!]]))
 
-           ;; :on-click #(do 
-           ;;              (swap! !state update-in path-to-cell
-           ;;                     (togglefn :marked))
-           ;;              (save-board! !state 
-           ;;                           bingo-path 
-           ;;                           (get-board !state bingo-path)))
-
-(def possible 
-  #{"atom" 
-    "big data" 
-    "boot"
-    "conj"
-    "complect"
-    "decomplect"
-    "destructure"
-    "emacs"
-    "eval"
-    "filter"
-    "lein"
-    "macro"
-    "map"
-    "paper"
-    "reduce"
-    "reify"
-    "ring"
-    "simple"
-    "state"
-    "transduce"
-    "transducer"
-    "transact"
-    "react"
-    "reader"
-    "list"})
-
 ;; Session Management
 
 (defn new-session []
@@ -115,6 +81,13 @@
 (defn load-board [sessionid]
   (go (<! (aws/<run aws/get-item sessionid))))
 
+;; :on-click #(do 
+;;              (swap! !state update-in path-to-cell
+;;                     (togglefn :marked))
+;;              (save-board! !state 
+;;                           bingo-path 
+;;                           (get-board !state bingo-path)))
+
 (defn save-board! [!state bingo-path b]
   (swap! !state assoc-in (conj bingo-path :board) b)
   (go (let [{:keys [sessionid last_updated]} (get-session !state bingo-path)]
@@ -173,3 +146,6 @@
 (defn main [])
 
 (defn reload [])
+
+
+

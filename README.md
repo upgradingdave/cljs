@@ -31,9 +31,13 @@ Secret Access Key: UBtdT4Bk1k5vLS4SWvzYn5XF8/wOYIFJDP3rOs8M
 - DONE! Basic Error Handling
   :error key is populated whenever there's an error
 
+- Able to make read only boards
+
 - Able to see other User's Boards
 
 - Able to see n most recent boards
+
+- Implement "free" space
 
 - Implement Score
 
