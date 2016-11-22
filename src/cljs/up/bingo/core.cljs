@@ -81,6 +81,14 @@
 (defn load-board [sessionid]
   (go (<! (aws/<run aws/get-item sessionid))))
 
+(defn load-words [!state path]
+  (go (let [res (<! (aws/<run aws/query 
+                               "app.config" 
+                               {:app_name "bingo"}))]
+        (if-let [words (into #{} (:words (first (get res :Items))))]
+          (swap! !state assoc-in (conj path :words) words)
+          (swap! !state assoc-in (conj path :words :error) res)))))
+
 ;; :on-click #(do 
 ;;              (swap! !state update-in path-to-cell
 ;;                     (togglefn :marked))

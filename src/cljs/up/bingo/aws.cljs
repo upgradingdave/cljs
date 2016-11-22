@@ -96,6 +96,8 @@
                       :Key (clj->db key-map)})
             cb))
 
+;; TODO currently, I'm using last_updated as sort key and so this gets
+;; the latest record for given primary key, which is all I need for now
 (defn query' [table-name key-condition-expression 
               expression-attribute-values cb]
   (let [q 

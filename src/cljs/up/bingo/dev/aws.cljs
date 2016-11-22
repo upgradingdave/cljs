@@ -5,6 +5,7 @@
    [up.bingo.core       :as b]
    [up.bingo.aws        :as aws]
    [up.bingo.dev.data   :as d]
+   [up.datetime         :as dt]
    [cljs.core.async :refer [put! chan <! >! close!]]
    )
   (:require-macros
@@ -76,6 +77,54 @@
        data "app.config" {:app_name "test" 
                           :last_updated "20161024T213150.000-04:00"}]]))
   (r/atom {})
+  {:inspect-data true})
+
+(defcard 
+  "### Add Term"
+  (dc/reagent 
+   (fn [data _]
+     [:div.form-horizontal
+
+      [:ul.list-group
+       (for [word (sort (:words @data))]
+         [:li.list-group-item {:key word} word])]
+
+      [:div.form-group
+       [:label.control-label.col-sm-3.col-xs-3 "Add Word"]
+       [:div.col-sm-3.col-xs-3
+        [:input.form-control
+         {:type "text"
+          :value (get-in @data [:new-word])
+          :on-change
+          #(let [v (.-value (.-target %))]
+             (swap! data assoc-in [:new-word] v))}]]]
+
+      [:div.form-group
+       [:div.col-sm-offset-3.col-sm-10
+        [:div.btn-group
+
+      [:div.btn.btn-primary 
+       {:on-click 
+        #(let [new-word (:new-word @data)
+               words    (:words @data)] 
+           (swap! data assoc :words (conj words new-word))
+           (go 
+             (let [res 
+                   (<! (aws/<run 
+                        aws/put-item 
+                        "app.config" 
+                        {:app_name "bingo" 
+                         :last_updated (dt/unparse dt/iso-8601-format (dt/now))
+                         :words (into [] (:words @data))}))]
+               (swap! data assoc :result res))))}
+       "Add and Save"]
+
+         [:div.btn.btn-primary 
+          {:on-click 
+           #(b/load-words data [])}
+          "Fetch Items"]]]]
+      ]))
+  (r/atom {:words #{}})
   {:inspect-data true})
 
 (deftest unit-tests
