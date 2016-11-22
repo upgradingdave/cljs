@@ -4,13 +4,11 @@
 
 ;;linear-gradient(to right, blue3, blue4)
 
-(def cell-height 110)
-(def cell-width  110)
-(def font-size   20)
+(defn board-height [cell-height gutter-size] 
+  (+ (* 6 gutter-size) (* 5 cell-height)))
 
-(def gutter-size  15)
-(def board-height (+ (* (inc 5) gutter-size) (* 5 cell-height)))
-(def board-width  (+ (* (inc 5) gutter-size) (* 5 cell-width)))
+(defn board-width [cell-width gutter-size] 
+  (+ (* 6 gutter-size) (* 5 cell-width)))
 
 (def colors 
   {:black1       "#292d2e"
@@ -37,10 +35,10 @@
 
    })
 
-(defn board-style []
+(defn board-style [cell-width cell-height gutter-size]
   {:background-color   (:blue3 colors)
-   :width              (str board-width  "px")
-   :height             (str board-height "px")
+   :width              (str (board-width  cell-width  gutter-size) "px")
+   :height             (str (board-height cell-height gutter-size) "px")
    :border-radius      "6px"
    :position           "relative"
 
@@ -49,7 +47,7 @@
    :transform          "translate3d(0,0,0)"
    })
 
-(defn cell-style []
+(defn cell-style [cell-width cell-height font-size]
   {
    :background-color (:blue4 colors)
    :height           (str cell-height "px")
@@ -58,21 +56,22 @@
    :font-family      "\"Helvetica Neue\", Arial, sans-serif"
    :font-size        (str font-size "px")
    :color            (:green1 colors)
-   :line-height      "102px" 
+   :line-height      (str (/ cell-height 1.1) "px") 
    :font-weight      "bold"
    :text-align       "center"
    :vertical-align   "middle"
-   :padding          "auto"
 
    :-webkit-transform "translate3d(0,0,0)"
    :-moz-transform    "translate3d(0,0,0)"
    :transform         "translate3d(0,0,0)"
    })
 
-(defn cell-pos [top left]
+(defn cell-pos [top left cell-width cell-height gutter-size]
   {:position   "absolute"
-   :top        top 
-   :left       left
+   :top        (str (+ (* top cell-height) 
+                 (* (inc top) gutter-size)) "px")
+   :left       (str (+ (* left cell-width)  
+                 (* (inc left) gutter-size)) "px")
    :cursor     "pointer"
    })
 

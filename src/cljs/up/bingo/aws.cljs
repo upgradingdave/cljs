@@ -70,7 +70,6 @@
   [f & args]
   (let [c (chan)
         cb (fn [err data]
-             (js/console.log "handling response")
              (if err 
                (put! c {:error (error->map err)})
                (if (not (empty-or-nil? data))
@@ -86,12 +85,51 @@
                       :Item (clj->db content)})
             cb))
 
-(defn get-item [sessionid cb]
+(defn get-item [sessionid last_updated cb]
   ;;(js/console.log "ATTEMPTING GET" (pr-str sessionid))
   (.getItem db 
             (clj->js {:TableName "bingo.cards"
-                      :Key {:sessionid {:S sessionid}}}) 
+                      :Key {:sessionid {:S sessionid}
+                            :last_updated {:S last_updated}}}) 
             cb))
 
+(defn query' [key-condition-expression expression-attribute-values cb]
+  (let [q 
+        {:TableName "bingo.cards"
+         :KeyConditionExpression key-condition-expression
+         :ExpressionAttributeValues expression-attribute-values
+         :Limit 1
+         :ScanIndexForward false}]
+    ;;(js/console.log "ATTEMPTING QUERY" (pr-str q))
+    (.query db (clj->js q) cb)))
+
+(defn m->key-condition-expression 
+  "Convert a map to key-condition expression"
+  [m]
+  (apply str (interpose " AND " (map (fn [[k _]] (str (name k) "=" k)) m))))
+
+(defn keywordstrify-keys
+  "Like keywordize-keys but it leaves the colon (:) on the keynames"
+  [m]
+  (let [f (fn [[k v]] (if (keyword? k) [(str k) v] [k v]))]
+    (w/postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))
+
+(defn query [m cb]
+  (let [kce (m->key-condition-expression m)
+        eav (clj->db (keywordstrify-keys m))]
+    (query' kce eav cb)))
+
+(defn scan' [cb]
+  (let [q 
+        {:TableName "bingo.cards"
+         :ScanFilter {:sessionid {:ComparisonOperator "NE"
+                                  :AttributeValueList [{:S "test"}]}}}]
+    ;;(js/console.log "ATTEMPTING SCAN" (pr-str q))
+    (.scan db (clj->js q) cb)))
+
+(defn scan 
+  "Currently, this gets everything the 'test' board"
+  [cb]
+  (scan' cb))
 
 
