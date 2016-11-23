@@ -37,6 +37,8 @@ Secret Access Key: UBtdT4Bk1k5vLS4SWvzYn5XF8/wOYIFJDP3rOs8M
 
 - Able to see n most recent boards
 
+- Handle offline
+
 - Implement "free" space
 
 - Implement Score

@@ -30,9 +30,13 @@
       [c/cell data [:cell] {:cell-width  50
                             :cell-height 50
                             :font-size   5}]
+
+      [c/cell data [:cell] {:cell-width  25
+                            :cell-height 25
+                            :font-size   5}]
       ]))
   (r/atom {:cell {:key "00" :value "Example"}})
-  {:inspect-data false})
+  {:inspect-data true})
 
 (defcard 
   "### Bingo Board"
@@ -43,7 +47,7 @@
                                     :font-size   5
                                     :gutter-size 2})))
   (r/atom {:bingo {:board (b/make-board (take 25 d/words))}})
-  {:inspect-data false})
+  {:inspect-data true})
 
 (defcard 
   "### Bingo Board"

@@ -121,9 +121,11 @@
 
          [:div.btn.btn-primary 
           {:on-click 
-           #(b/load-words data [])}
-          "Fetch Items"]]]]
-      ]))
+           #(go (let [{:keys [error result]} (<! (b/<load-words))]
+                  (if result
+                    (swap! data assoc :words result)
+                    (swap! data assoc :error result))))}
+          "Fetch Items"]]]]]))
   (r/atom {:words #{}})
   {:inspect-data true})
 

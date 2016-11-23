@@ -3,6 +3,7 @@
   (:require [reagent.core    :as r]
             [up.bingo.css    :as css]
             [up.bingo.aws    :as aws]
+            [up.bingo.dev.data :as d]
             [up.datetime     :as dt]
             [up.cookies.core :as c]
             [cljs.core.async :refer [put! chan <! >! close!]]))
@@ -13,7 +14,9 @@
   {:sessionid    (str (random-uuid))
    :last_updated (dt/unparse dt/iso-8601-format (dt/now))})
 
-(defn save-session! [!state path session]
+(defn save-session! 
+  "Update global state and create a cookie with session info"
+  [!state path session]
   (swap! !state assoc-in (conj path :session) session)
   (c/set-cookie! :bingo session))
 
@@ -38,68 +41,41 @@
 
 (defn make-row 
   "Transform list of words into a row (list of reagent cell components)"
-  [data idx 
-   & [{:keys [cell-width cell-height gutter-size] 
-       :as opts
-       :or {cell-width  default-cell-width
-            cell-height default-cell-height
-            gutter-size default-gutter-size}}]]
+  [data idx]
   (map-indexed #(make-cell %2 idx %1) data))
 
 (defn make-board 
   "Transforms list of words into list of rows"
-  [data 
-   & [{:keys [cell-width cell-height gutter-size] 
-       :as opts
-       :or {cell-width  default-cell-width
-            cell-height default-cell-height
-            gutter-size default-gutter-size}}]]
+  [words]
   (into [] 
         (apply concat
-               (map (fn [[idx row]] 
-                      (make-row row idx cell-width cell-height gutter-size))
-                    (map-indexed vector (partition 5 data))))))
+               (map (fn [[idx row]] (make-row row idx))
+                    (map-indexed vector (partition 5 (take 25 words)))))))
 
-;; shouldn't need this anymore
-;; (defn resize-board 
-;;   "Adjust `top` and `left` attributes of all cells in a board"
-;;   [orig cell-width cell-height gutter-size]
-;;   (let [new (map #(dissoc %1 :value) 
-;;                  (make-board (range 25)
-;;                              cell-width cell-height gutter-size))]
-;;     (into [] (map-indexed #(merge (get orig %1) %2) 
-;;                           (map #(dissoc %1 :value) new)))))
+(defn random-board [possible-words]
+  (js/console.log "Making New Board ...")
+  (make-board (take 25 (shuffle possible-words))))
 
-;; (defn new-board [cell-width cell-height gutter-size]
-;;   (js/console.log "Making New Board ...")
-;;   (make-board (take 25 possible) cell-width cell-height gutter-size))
+(defn <load-board [sessionid last_updated]
+  (go (let [res (<! (aws/<run aws/get-item "bingo.cards" 
+                              {:sessionid sessionid
+                               :last_updated last_updated}))]
+        (if (:error res)
+          {:error  res}
+          {:result (:board (second res))}))))
 
-;; TODO calculate score
-(defn get-board [!state bingo-path]
-  (get-in @!state (conj bingo-path :board)))
-
-(defn load-board [sessionid]
-  (go (<! (aws/<run aws/get-item sessionid))))
-
-(defn load-words [!state path]
+(defn <load-words []
   (go (let [res (<! (aws/<run aws/query 
-                               "app.config" 
-                               {:app_name "bingo"}))]
+                              "app.config" 
+                              {:app_name "bingo"}))]
         (if-let [words (into #{} (:words (first (get res :Items))))]
-          (swap! !state assoc-in (conj path :words) words)
-          (swap! !state assoc-in (conj path :words :error) res)))))
-
-;; :on-click #(do 
-;;              (swap! !state update-in path-to-cell
-;;                     (togglefn :marked))
-;;              (save-board! !state 
-;;                           bingo-path 
-;;                           (get-board !state bingo-path)))
+          {:result words}
+          {:error  res}))))
 
 (defn save-board! [!state bingo-path b]
   (swap! !state assoc-in (conj bingo-path :board) b)
   (go (let [{:keys [sessionid last_updated]} (get-session !state bingo-path)]
-        (<! (aws/<run aws/put-item 
+        (<! (aws/<run aws/put-item "bingo.cards"
                       {:sessionid sessionid 
                        :last_updated last_updated
                        :score 0
@@ -107,32 +83,40 @@
 
 ;; /Data
 
-
 ;; State
 
 (def !state (r/atom {}))
 
 (defn init!
   [!state bingo-path]
+  
   ;; Try to get sessionid from cookie, if no cookie, then create one
   (let [{:keys [sessionid last_updated] :as session} 
         (or (c/get-cookie :bingo) (new-session))]
     
-;;    (js/console.log "INIT" sessionid last_updated)
+    (js/console.log "INIT" sessionid last_updated)
     (save-session! !state bingo-path session)
 
-    ;; Try to load board from db. If no board, then create one
-    ;; (go (let [res (<! (aws/<run aws/get-item sessionid last_updated))
-    ;;           err (:error res)
-    ;;           ;; if successful, get the board from response, otherwise
-    ;;           ;; new board
-    ;;           board (or (:board (second res)) 
-    ;;                     (new-board css/cell-width 
-    ;;                                css/cell-height 
-    ;;                                css/gutter-size))]
-    ;;       (when err
-    ;;         (swap! !state assoc-in (conj bingo-path :error) err))
-    ;;       (save-board! !state bingo-path board)))
+    (go 
+      ;; Try to load board from db using values from session cookie
+      (let [{:keys [error result]} 
+            (<! (<load-board sessionid last_updated))]
+        
+        (when error
+            (swap! !state assoc-in (conj bingo-path :error) error))
+
+        (if result
+          ;; we got a board, update local state and move on
+          (save-board! !state bingo-path result)
+          
+          ;; An error occurred or no board found in db. 
+          ;; So let's create a new board.
+          ;; Try to get list of possible words from db. If we can't get
+          ;; words from db, use words from dev data file
+          (let [{:keys [error result]} (<! (<load-words))
+                words (or result (d/words))]
+            (js/console.log "CREATING NEW BOARD")
+            (save-board! !state bingo-path (random-board words))))))
 
     ;; Try to load other boards from db.
     ;; (go (let [res (<! (aws/<run aws/scan))
@@ -150,10 +134,4 @@
     ))
 
 ;; /State
-
-(defn main [])
-
-(defn reload [])
-
-
 

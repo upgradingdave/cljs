@@ -43,7 +43,7 @@
   (let [cells (get-in @!state board-path)]
     [:div {:key (gensym) 
            :style (css/board-style cell-width cell-height gutter-size)}
-     (map-indexed #(cell !state (conj board-path %1) opts) cells)]))
+     (doall (map-indexed #(cell !state (conj board-path %1) opts) cells))]))
 
 (defn leader-boards 
   "Finds list of [:players :boards] in global state and displays them"

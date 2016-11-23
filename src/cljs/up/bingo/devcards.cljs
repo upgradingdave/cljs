@@ -2,14 +2,14 @@
   (:require
    [devcards.core :as dc :include-macros true]
    [up.bingo.dev.components :as c]
-   [up.bingo.dev.aws        :as aws]))
+   [up.bingo.dev.aws        :as aws]
+   [up.bingo.dev.session    :as session]))
 
 (defn main []
   (enable-console-print!)
   (dc/start-devcard-ui!)
-  ;;(dev/main)
-  )
+
+  (session/main))
 
 (defn reload []
-  ;;(dev/main)
-  )
+  (session/main))
