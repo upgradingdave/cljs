@@ -78,8 +78,6 @@
     (apply f (concat args [cb]))
     c))
 
-;; bingo.cards
-;; app.config
 (defn put-item [table-name content cb]
   (js/console.log "ATTEMPTING PUT" (pr-str (clj->db content)))
   (.putItem db 
@@ -87,46 +85,19 @@
                       :Item (clj->db content)})
             cb))
 
-;; {:sessionid {:S sessionid}
-;;  :last_updated {:S last_updated}}
 (defn get-item [table-name key-map cb]
-  ;;(js/console.log "ATTEMPTING GET" (pr-str sessionid))
+  ;;(js/console.log "ATTEMPTING GET" (pr-str (pr-str key-map)))
   (.getItem db 
             (clj->js {:TableName table-name
                       :Key (clj->db key-map)})
             cb))
 
-;; TODO currently, I'm using last_updated as sort key and so this gets
-;; the latest record for given primary key, which is all I need for now
-(defn query' [table-name key-condition-expression 
-              expression-attribute-values cb]
-  (let [q 
-        {:TableName table-name
-         :KeyConditionExpression key-condition-expression
-         :ExpressionAttributeValues expression-attribute-values
-         :Limit 1
-         :ScanIndexForward false}]
-    ;;(js/console.log "ATTEMPTING QUERY" (pr-str q))
-    (.query db (clj->js q) cb)))
+;; (defn m->key-condition-expression 
+;;   "Convert a map to key-condition expression"
+;;   [m]
+;;   (apply str (interpose " AND " (map (fn [[k _]] (str (name k) "=" k)) m))))
 
-(defn m->key-condition-expression 
-  "Convert a map to key-condition expression"
-  [m]
-  (apply str (interpose " AND " (map (fn [[k _]] (str (name k) "=" k)) m))))
-
-(defn keywordstrify-keys
-  "Like keywordize-keys but it leaves the colon (:) on the keynames"
-  [m]
-  (let [f (fn [[k v]] (if (keyword? k) [(str k) v] [k v]))]
-    (w/postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))
-
-;; TODO implement operators other than = for sort keys (if needed)
-(defn query [table-name key-cond-map cb]
-  (let [kce (m->key-condition-expression key-cond-map)
-        eav (clj->db (keywordstrify-keys key-cond-map))]
-    (query' table-name kce eav cb)))
-
-(defn m->scan-filter 
+(defn m->key-conditions
   "Convert a clj map into a scan-filter data structure"
   [m]
   (into 
@@ -139,19 +110,52 @@
                             :AttributeValueList (vector (val->db v))}) m2))}) 
                 (into [] m))))
 
+;; don't think I need this anymore
+;; (defn keywordstrify-keys
+;;   "Like keywordize-keys but it leaves the colon (:) on the keynames"
+;;   [m]
+;;   (let [f (fn [[k v]] (if (keyword? k) [(str k) v] [k v]))]
+;;     (w/postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))
+
+(defn query' [table-name {:keys [key-cond-map limit 
+                                 index-name query-filter] :as opts} cb]
+  (let [q (->
+           {:TableName table-name
+            :KeyConditions key-cond-map
+            :QueryFilter query-filter
+            ;;:KeyConditionExpression key-condition-expression
+            ;;:ExpressionAttributeValues expression-attribute-values
+            :ScanIndexForward false}
+           (merge (if index-name {:IndexName index-name}))
+           (merge (if limit      {:Limit limit})))]
+    ;;(js/console.log "ATTEMPTING QUERY" (pr-str q))
+    (.query db (clj->js q) cb)))
+
+(defn query 
+  "Use nil as index-name to query the primary key. Use nil for limit
+  to return all results. 
+  Ex: (\"mytable\" {:gameid {:EQ \"test\"}} 1 nil cb)"
+  [table-name {:keys [key-cond-map limit index-name query-filter] :as opts} cb]
+  (query' table-name 
+          (-> opts
+              (assoc :key-cond-map (m->key-conditions key-cond-map))
+              (assoc :query-filter (m->key-conditions query-filter))) 
+          cb))
+
 (defn scan' 
   "scan-filter-map should look like this 
    {:sessionid {:ComparisonOperator \"NE\"
                 :AttributeValueList [{:S \"test\"}]}}"
-  [table-name scan-filter-map cb]
+  [table-name key-cond-map cb]
   (let [q 
         {:TableName table-name
-         :ScanFilter scan-filter-map}]
-    ;;(js/console.log "ATTEMPTING SCAN" (pr-str q))
+         :ScanFilter key-cond-map}]
+    (js/console.log "ATTEMPTING SCAN" (pr-str q))
     (.scan db (clj->js q) cb)))
 
-(defn scan [table-name filter-map cb]
-  (let [q (m->scan-filter filter-map)]
-    (scan' table-name q cb)))
+(defn scan 
+  "Ex: (\"mytable\" {:sessionid {:NE \"test\"}} 1 cb)"
+  [table-name key-cond-map cb]
+  (scan' table-name (m->key-conditions key-cond-map) cb))
 
 

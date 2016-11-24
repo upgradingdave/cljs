@@ -47,16 +47,17 @@
                                     :font-size   5
                                     :gutter-size 2})))
   (r/atom {:bingo {:board (b/make-board (take 25 d/words))}})
-  {:inspect-data true})
+  {:inspect-data false})
 
 (defcard 
-  "### Bingo Board"
+  "### Active Bingo Board"
   (dc/reagent 
    (fn [data _]
      (c/board data [:bingo :board] {:cell-width  75
                                     :cell-height 75
                                     :font-size   10
-                                    :gutter-size 5})))
+                                    :gutter-size 5
+                                    :read-only false})))
   (r/atom {:bingo {:board (b/make-board (take 25 d/words))}})
   {:inspect-data false})
 
@@ -72,10 +73,11 @@
   "### Bingo Boards"
   (dc/reagent 
    (fn [data _]
-     (c/leader-boards data [:bingo] {:cell-width  35
-                                     :cell-height 35
-                                     :font-size   5
-                                     :gutter-size 2})))
+     (c/leader-boards data [:bingo :players :boards] 
+                      {:cell-width  35
+                       :cell-height 35
+                       :font-size   5
+                       :gutter-size 2})))
   (r/atom {:bingo 
            {:players 
             {:boards 

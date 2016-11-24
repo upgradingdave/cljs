@@ -27,18 +27,25 @@
       board should display and should persist between browser
       refresh. "]
 
-      [c/board !state [:bingo :board] 
-       {:cell-width  35
-        :cell-height 35
-        :font-size   5
+      [c/board data [:bingo :board] 
+       {:cell-width  55
+        :cell-height 55
+        :font-size   10
         :gutter-size 2
-        :click-fn #(b/save-board! data [:bingo] 
-                                  (get-in @data [:bingo :board]))}]])) 
+        :read-only false
+        :click-fn #(b/save-board! data [:bingo] "devcards"
+                                  (get-in @data [:bingo :board])
+                                  true)}]
+
+      [c/leader-boards data [:bingo :leaders] {:cell-width  25
+                                               :cell-height 25
+                                               :font-size   5
+                                               :gutter-size 2}]])) 
   
   !state 
   {:inspect-data true})
 
 (defn main []
-  ;;(b/init! !state [:bingo])
+  ;;(b/init! !state [:bingo] "devcards")
   )
 

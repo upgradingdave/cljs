@@ -66,13 +66,13 @@
    :transform         "translate3d(0,0,0)"
    })
 
-(defn cell-pos [top left cell-width cell-height gutter-size]
+(defn cell-pos [top left cell-width cell-height gutter-size read-only]
   {:position   "absolute"
    :top        (str (+ (* top cell-height) 
                  (* (inc top) gutter-size)) "px")
    :left       (str (+ (* left cell-width)  
                  (* (inc left) gutter-size)) "px")
-   :cursor     "pointer"
+   :cursor     (if (not read-only) "pointer")
    })
 
 (defn cell-marked [] 

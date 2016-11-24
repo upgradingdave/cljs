@@ -33,17 +33,15 @@ Secret Access Key: UBtdT4Bk1k5vLS4SWvzYn5XF8/wOYIFJDP3rOs8M
 
 - DONE! Able to see other User's Boards
 
-- Able to make read only boards
+- DONE! Able to make read only boards
 
-- Able to see n most recent boards
-
-- Handle offline
-
-- Implement "free" space
-
-- Implement Score
+- DONE! Able to see n most recent boards
 
 - Live polling
+- Implement Score
+- Implement "free" space
+
+- Handle offline
 
 - Implement Invitations
 

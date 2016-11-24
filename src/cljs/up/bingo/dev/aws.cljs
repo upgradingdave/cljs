@@ -28,15 +28,18 @@
            (swap! data assoc :result res)))}
    "Get Item"])
 
-(defn query-button [data table-name key-cond-map]
+(defn query-button [data button-text table-name key-cond-map & [index-name]]
   [:div.btn.btn-primary 
-   {:on-click #(go (let [res (<! (aws/<run aws/query table-name key-cond-map))] 
+   {:on-click #(go (let [res (<! (aws/<run aws/query table-name 
+                                           {:key-cond-map key-cond-map
+                                            :index-name index-name}))] 
                      (swap! data assoc :result res)))}
-   "Query Item"])
+   button-text])
 
 (defn scan-button [data table-name filter]
   [:div.btn.btn-primary 
-   {:on-click #(go (let [res (<! (aws/<run aws/scan table-name filter))] 
+   {:on-click #(go (let [res (<! (aws/<run aws/scan table-name filter nil))] 
+                     (js/console.log "Got scan response ...")
                      (swap! data assoc :result res)))}
    "Scan"])
 
@@ -46,17 +49,21 @@
    (fn [data _]
      [:div
       [put-button 
-       data "bingo.cards" {:sessionid "test" 
+       data "bingo.cards" {:gameid    "test" 
+                           :sessionid "test1"
                            :last_updated "20161024T213150.000-04:00"
                            :score 0
                            :board (b/make-board (take 5 d/words))}]
 
       [get-button 
-       data "bingo.cards" {:sessionid "test" 
-                           :last_updated "20161024T213150.000-04:00"}]
+       data "bingo.cards" {:gameid "test" 
+                           :sessionid "test1"}]
 
-      [query-button 
-       data "bingo.cards" {:sessionid "test"}]
+      [query-button data "Query (Sessionid)" "bingo.cards" 
+       {:gameid {:EQ "test"}}]
+
+      [query-button data "Query (Score)" "bingo.cards" 
+       {:gameid {:EQ "test"}} nil "gameid-score-index"]
 
       [scan-button 
        data "bingo.cards" {:sessionid {:NE "test"}}]
@@ -70,12 +77,13 @@
    (fn [data _]
      [:div
       [put-button 
-       data "app.config" {:app_name "test" 
+       data "app.config" {:app_name "bingo.test" 
                           :last_updated "20161024T213150.000-04:00"
                           :words ["one" "two" "three"]}]
       [get-button 
-       data "app.config" {:app_name "test" 
-                          :last_updated "20161024T213150.000-04:00"}]]))
+       data "app.config" {:app_name "bingo.test" 
+                          ;;:last_updated "20161024T213150.000-04:00"
+                          }]]))
   (r/atom {})
   {:inspect-data true})
 
@@ -127,6 +135,7 @@
                     (swap! data assoc :error result))))}
           "Fetch Items"]]]]]))
   (r/atom {:words #{}})
+  ;;(r/atom {:words d/words})
   {:inspect-data true})
 
 (deftest unit-tests
@@ -155,5 +164,5 @@
 
     (is (=    {:sessionid {:ComparisonOperator "NE"
                            :AttributeValueList [{:S "test"}]}}
-              (aws/m->scan-filter {:sessionid {:NE "test"}})))
+              (aws/m->key-conditions {:sessionid {:NE "test"}})))
     ))
