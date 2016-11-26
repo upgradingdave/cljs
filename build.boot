@@ -102,7 +102,7 @@
    ))
 
 (deftask bingo
-  "Sets up environment for clojure bingo"
+  "Sets up dev environment for clojure bingo"
   []
   (comp
    (serve)
@@ -110,6 +110,20 @@
    (watch)
    (reload 
     :on-jsload 'up.bingo.devcards/reload
-    :ids #{"public/js/bingo"})
-   (cljs :ids #{"public/js/bingo"})
-   ))
+    :ids #{"public/js/bingo_dev"
+           "public/js/bingo"})
+   (cljs :ids #{"public/js/bingo_dev"
+                "public/js/bingo"})))
+
+;; (deftask bingo
+;;   "Sets up environment for clojure bingo app"
+;;   []
+;;   (comp
+;;    (serve)
+;;    (cider)
+;;    (watch)
+;;    (reload 
+;;     :on-jsload 'up.bingo.app/reload
+;;     :ids #{"public/js/bingo"})
+;;    (cljs :ids #{"public/js/bingo"})
+;;    ))

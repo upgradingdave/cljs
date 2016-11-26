@@ -169,7 +169,7 @@
   
   (let [f #(init' !state bingo-path gameid)]
     (f)
-    (poll 5000 f)))
+    (poll 10000 f)))
 
 ;; /State
 

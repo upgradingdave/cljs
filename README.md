@@ -6,13 +6,22 @@ learned building each of these widgets on my blog at
 [http://www.upgradingdave.com/blog](http://www.upgradingdave.com/blog).
 
 To run Devcards in hot reloaded dev mode, use `boot dev`, then browse
-to `http://localhost:3000/dev.html`
+to [http://localhost:3000/dev.html](http://localhost:3000/dev.html).
 
 To produces a stand alone, advanced compiled `devcards.js` file (that
 can be hosted in production), `boot devcards`, then browse to
 `http://localhost:3000/devcards.html`
 
 ## Clojure Bingo!
+
+For development, run `boot bingo` and then browse to
+[http://localhost:3000/bingo-dev.html](http://localhost:3000/bingo-dev.html).
+You can also see the application in dev mode at
+[http://localhost:3000/bingo.html](http://localhost:3000/bingo.html)
+
+(TODO)
+To compile the app for production, run `boot bingo` and then browse to
+[http://localhost:3000/bingo-prod.html](http://localhost:3000/bingo-prod.html)
 
 - DONE! cell
 
@@ -37,8 +46,14 @@ Secret Access Key: UBtdT4Bk1k5vLS4SWvzYn5XF8/wOYIFJDP3rOs8M
 
 - DONE! Able to see n most recent boards
 
-- Live polling
+- DONE! Live polling
+
+- Implement main screen for multiple devices
+
 - Implement Score
+
+- Implement user validation on terms
+
 - Implement "free" space
 
 - Handle offline
