@@ -39,6 +39,8 @@
    [hiccup "1.0.5"]
 
    [cljsjs/aws-sdk-js "2.2.41-2"]
+   [cljsjs/auth0      "7.0.4-0"]
+   [cljsjs/auth0-lock "10.4.0-0"]
 
    ])
 

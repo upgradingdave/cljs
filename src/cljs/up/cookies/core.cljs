@@ -11,6 +11,9 @@
   (.set cookies (name cookie-name) (pr-str value) 
         86400 "/"))
 
+(defn remove-cookie! [cookie-name]
+  (.remove cookies cookie-name "/"))
+
 (defn get-cookie [cookie-name]
   (when-let [v (.get cookies (name cookie-name))]
     (reader/read-string v)))

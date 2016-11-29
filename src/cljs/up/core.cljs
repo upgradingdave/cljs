@@ -2,6 +2,7 @@
   (:require
    [devcards.core :as dc :include-macros true]
    [up.alerts.dev            :as alerts]
+   [up.auth0.dev             :as auth0]
    [up.cookies.dev           :as cookies]
    ;;removed: [up.bmr.dev               :as bmr]
    [up.health.dev            :as health]
@@ -33,7 +34,9 @@
   ;;(wworker/main)
   (notify/main)
   (timer/main)
-  (cookies/main))
+  (cookies/main)
+  (auth0/main)
+  )
 
 ;; This is used in :on-jsload in boot-reload configuration in
 ;; build.boot
@@ -41,4 +44,5 @@
   ;;(wworker/main)
   (notify/main)
   (timer/main)
-  (cookies/main))
+  (cookies/main)
+  (auth0/main))
