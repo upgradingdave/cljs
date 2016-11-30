@@ -48,7 +48,7 @@ Secret Access Key: UBtdT4Bk1k5vLS4SWvzYn5XF8/wOYIFJDP3rOs8M
 
 - DONE! Live polling
 
-- Implement main screen for multiple devices
+- DONE! Implement main screen for multiple devices
 
 - Implement Score
 
@@ -66,3 +66,12 @@ Secret Access Key: UBtdT4Bk1k5vLS4SWvzYn5XF8/wOYIFJDP3rOs8M
 https://www.google.com/search?q=retro+bingo&espv=2&biw=1430&bih=689&tbm=isch&source=lnms&sa=X&ved=0ahUKEwjYibmk7LXQAhVF7CYKHUWOBEgQ_AUIBigB#tbm=isch&q=bingo+card&imgrc=9xe5V1jUmkuN3M%3A
 
 - Show notice about cookies
+
+- implement sign in
+auth0 iam role
+arn:aws:iam::772097437621:role/auth0
+
+bingo-dynamodb policy
+arn:aws:iam::772097437621:policy/bingo-dynamodb
+
+

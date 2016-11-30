@@ -1,6 +1,7 @@
 (ns up.bingo.core  
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [reagent.core    :as r]
+            [up.env          :as env]
             [up.bingo.css    :as css]
             [up.bingo.aws    :as aws]
             [up.bingo.dev.data :as d]
@@ -34,6 +35,18 @@
 (def default-font-size   20)
 (def default-gutter-size 15)
 
+;;110 20 15 
+(defn calc-board-size 
+  "Calculate dimensions of the board based on size of window"
+  []
+  (let [{:keys [width height]} (env/get-dimensions)
+        smallest (if (< width height) width height)
+        size (* 0.75 (/ smallest 5))]
+    {:cell-width  size
+     :cell-height size
+     :gutter-size (/ size 11)
+     :font-size   (/ size 6)}))
+
 (defn make-cell 
   [value top-idx left-idx]
   {:key   (str top-idx left-idx) 
@@ -66,19 +79,6 @@
           {:error  res}
           {:result (:board (second res))}))))
 
-;; TODO
-    ;; (go (let [res (<! (aws/<run aws/scan))
-    ;;           err (:error res)
-    ;;           others (:Items res)
-    ;;           player-path (conj bingo-path :players)
-    ;;           ;; resize the other player's boards
-    ;;           others (map (fn [{:keys [board]}] 
-    ;;                         (resize-board board 50 50 5)) others)
-    ;;           ]
-    ;;       (if err
-    ;;         (swap! !state assoc-in (conj player-path :error) err)
-    ;;         (swap! !state assoc-in (conj player-path :boards) others)
-    ;;         )))
 (defn <leader-boards 
   "Query the score index to get list of boards by score excluding the
   current board"

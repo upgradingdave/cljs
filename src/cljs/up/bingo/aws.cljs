@@ -79,7 +79,7 @@
     c))
 
 (defn put-item [table-name content cb]
-  (js/console.log "ATTEMPTING PUT" (pr-str (clj->db content)))
+  ;;(js/console.log "ATTEMPTING PUT" (pr-str (clj->db content)))
   (.putItem db 
             (clj->js {:TableName table-name
                       :Item (clj->db content)})

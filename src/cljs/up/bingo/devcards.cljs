@@ -8,8 +8,9 @@
 (defn main []
   (enable-console-print!)
   (dc/start-devcard-ui!)
-
-  (session/main))
+  (session/main)
+  (c/main))
 
 (defn reload []
-  (session/main))
+  (session/main)
+  (c/reload))

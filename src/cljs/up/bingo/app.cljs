@@ -3,32 +3,32 @@
   (:require [reagent.core        :as r]
             [up.bingo.core       :as b]
             [up.bingo.components :as c]
-            [up.bingo.css        :as css]
+            [up.env              :as env]
             [cljs.core.async :refer [put! chan <! >! close!]]))
 
 (defn app-container [!state path]
-  (let [show-grid? true]
+  (let [{:keys [width height]} (env/get-dimensions)
+        vertical? (and (> width height))]
     [:div.container
+     [:div.row
+      [:div [:h1 "Clojure Bingo!"]]
+      ;;[:h3 (str "Width: " width ", Height: " height)]
+      ]
      [:div.row 
-      [:div.col-xs-12.col-sm-12.col-md-12
-       {:style (if show-grid? (css/show-grid))}
-       (let [{:keys [width height]} (get-in @!state [:env])]
-         [:h3 (str "Width: " width ", Height: " height)])]]
-     [:div.row 
-      [:div.col-xs-12.col-sm-12.col-md-12
-       {:style (if show-grid? (css/show-grid))}
-       [:h2 "Clojure Bingo!"]]]
-     [:div.row {:style (css/show-grid)}
-      [:div.col-xs-12.col-sm-12.col-md-7 
-       {:style (if show-grid? (css/show-grid))}
-       [c/board !state [:bingo :board] 
-        {:font-size 15
-         :read-only false
-         :click-fn #(b/save-board! !state [:bingo] b/gameid
-                                   (get-in @!state [:bingo :board])
-                                   true)}]]
-      [:div.col-xs-12.col-sm-12.col-md-5
-       [:h2 "Leader Boards"]]]]))
+      [:div {:class (if vertical? "pull-left")}
+       (c/board !state [:bingo :board] 
+                (-> (b/calc-board-size)
+                    (assoc :read-only false)
+                    (assoc :click-fn 
+                           #(b/save-board! !state [:bingo] b/gameid
+                                           (get-in @!state [:bingo :board])
+                                           true))))]
+      [:div
+       {:class (if vertical? "col-xs-2 col-sm-2 col-md-4 col-lg-4")}
+       [c/leader-boards 
+        !state [:bingo :leaders] 
+        (-> (into {} (for [[k v] (b/calc-board-size)] [k (/ v 3.1)]))
+            (assoc :vertical? vertical?))]]]]))
 
 (def !state (r/atom {}))
 

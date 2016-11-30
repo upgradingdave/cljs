@@ -51,21 +51,36 @@
      (doall (map-indexed #(cell !state (conj board-path %1) opts) cells))]))
 
 (defn leader-boards 
-  "Finds list of [:players :boards] in global state and displays them"
+  "Finds list of [:players :boards] in global state and displays them.
+  This checks width and height of the display and displays the leader
+  boards horizontally if the width is less than height or vertically
+  otherwise."
   [!state boards-path
-   & [{:keys [cell-width cell-height gutter-size font-size click-fn]
+   & [{:keys [cell-width cell-height gutter-size font-size click-fn vertical?]
        :as opts
        :or {cell-width  b/default-cell-width
             cell-height b/default-cell-height
             gutter-size b/default-gutter-size
-            font-size   b/default-font-size}}]]
+            font-size   b/default-font-size
+            vertical?   true}}]]
   (let [boards      (get-in @!state boards-path)
         board-paths (map-indexed #(conj boards-path %1 :board) boards)]
-     [:div.container
-      [:div.row
-       (doall
-        (for [p board-paths]
-          [:div.col-sm-2.col-xs-3 {:key (first (take-last 2 p))}
-           (board !state p opts)]))]]))
+    (if vertical?
+      [:div.container
+       [:div.row
+        [:div [:h3 "Leader Boards"]]]
+       (doall (for [path board-paths]
+                [:div.row {:style {:margin-bottom "5px"} 
+                           :key   (first (take-last 2 path))}
+                 (board !state path opts)]))]
+      [:div.container
+       [:div.row
+        [:h3 "Leader Boards"]
+        (doall (for [path board-paths]
+                 [:div.pull-left 
+                  {:style {:padding "5px"}
+                   :key (first (take-last 2 path))}
+                  (board !state path opts)]))]]
+       )))
 
 ;; /Reagent Components
