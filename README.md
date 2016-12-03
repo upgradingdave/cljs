@@ -50,9 +50,13 @@ Secret Access Key: UBtdT4Bk1k5vLS4SWvzYn5XF8/wOYIFJDP3rOs8M
 
 - DONE! Implement main screen for multiple devices
 
-- Implement Score
+- Scoring
+Only get words from last minute
+Only display buttons for other peoples pending words
+Every long poll, check current board for matches on confirmed words
+When confirmed, update score.
 
-- Implement user validation on terms
+- Implement winning
 
 - Implement "free" space
 

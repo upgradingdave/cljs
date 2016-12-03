@@ -11,26 +11,57 @@
    [devcards.core :refer [defcard deftest defcard-doc]]
    [cljs.test            :refer [is testing]]))
 
+(def css-transition-group
+  (r/adapt-react-class js/React.addons.CSSTransitionGroup))
+
+(defn word [data pending-path word]
+  (let [opacity (r/atom 1)]
+    {:render
+     (fn [data pending-path word]
+       [:li {:style {:opacity opacity}} 
+        [:div (str "Did you hear '"word"'?")] 
+        [:div.btn-group
+         [:btn {:class "btn btn-primary"
+                :on-click #(b/confirm! data pending-path word false)} "Yes"]
+         [:btn {:class "btn btn-danger"} "Nope"]]])}))
+
 (defcard 
   "### Auto Resize"
   (dc/reagent 
 
    (fn [data _]
-     (let [{:keys [width height]} (env/get-dimensions)]
-      [:div.container
-       [:div.row.col-xs-12
-        [:h3 (str "Width: " width ", Height: " height)]]
-       [:div.row 
-        [:div
-         {:class (if (> width height)  "pull-left") 
-          :style (css/show-grid)}
-         (c/board data [:bingo :board] (b/calc-board-size))]
-        [:div
-         {:class (if (> width height) "col-xs-5 col-sm-5 col-md-5 col-lg-5")}
-         [c/leader-boards 
-          data [:bingo :players :boards] 
-          (-> (into {} (for [[k v] (b/calc-board-size)] [k (/ v 3.1)]))
-              (assoc :vertical? (> width height)))]]]])))
+     (let [{:keys [width height]} (env/get-dimensions)
+           pending-path [:pending]]
+       [:div
+        [:div.container
+         [:div.row.col-xs-12
+          [:h3 (str "Width: " width ", Height: " height)]]
+         [:div.row 
+          [:div.col-xs-6.col-sm-10.col-md-8.col-lg-7
+           (c/board data [:bingo :board] 
+                    (-> (b/calc-board-size)
+                        (assoc :read-only false)
+                        (assoc :click-fn 
+                               (fn [path-to-cell]
+                                 (b/save-board! data [:bingo] b/gameid
+                                                (get-in @data [:bingo :board])
+                                                false)
+                                 (b/submit-pending! data 
+                                                    pending-path 
+                                                    path-to-cell false)))))]
+          [:div.col-xs-4.col-sm-2.col-md-3.col-lg-5
+           [:h4 "Help people out! Click the buttons to confirm that you
+         just heard the same word they did"]
+           [:ul
+            (for [[k _] (->> (get-in @data pending-path) 
+                             (filter (fn [[k {:keys [confirmed]}]] (not confirmed)))
+                             (sort (fn [[_ {t1 :ts}] [_ {t2 :ts}]] (< t1 t2))))]
+              ^{:key k}[word data pending-path k])]
+           ]]
+         [:div.row
+          [c/leader-boards 
+           data [:bingo :players :boards] 
+           (-> (into {} (for [[k v] (b/calc-board-size)] [k (/ v 3.1)])))]]]])))
 
   ;; reagent state
   (r/atom {:bingo 
@@ -41,7 +72,7 @@
               {:board (b/make-board (take 25 (shuffle d/words)))}
               {:board (b/make-board (take 25 (shuffle d/words)))}]}}})
   
-  {:inspect-data false})
+  {:inspect-data true})
 
 (defn color-swatch [color-name hex]
   [:div {:key color-name

@@ -115,6 +115,24 @@
                          :score 0
                          :board b}))))))
 
+(defn submit-pending! 
+  [!state pending-path path-to-cell persist?]
+  (let [{:keys [value]} (get-in @!state path-to-cell)]
+    (swap! !state assoc-in (conj pending-path value) 
+           {:ts (dt/unparse dt/iso-8601-format (dt/now))}))
+  ;; TODO persist pending words
+  ;; (if persist?)
+  )
+
+(defn confirm! 
+  [!state pending-path word persist?]
+  (swap! !state assoc-in (conj pending-path word) 
+         {:ts (dt/unparse dt/iso-8601-format (dt/now))
+          :confirmed true})
+  ;; TODO persist pending words
+  ;; (if persist?)
+  )
+
 ;; /Data
 
 ;; State

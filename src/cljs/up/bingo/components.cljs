@@ -9,8 +9,11 @@
     (let [orig (get col k)]
       (assoc col k (not orig)))))
 
-(defn toggle-marked [!state path-to-cell]
-  (swap! !state update-in path-to-cell (togglefn :marked)))
+(defn toggle-marked 
+  [!state path-to-cell]
+  (let [{:keys [marked]} (get-in @!state path-to-cell)]
+    (if (not marked)
+      (swap! !state update-in path-to-cell (togglefn :marked)))))
 
 (defn cell 
   [!state path-to-cell
@@ -34,7 +37,7 @@
                        (if (not read-only)
                          (do
                            (toggle-marked !state path-to-cell)
-                           (when click-fn (click-fn)))))}
+                           (when click-fn (click-fn path-to-cell)))))}
      value]))
 
 (defn board 
@@ -51,36 +54,27 @@
      (doall (map-indexed #(cell !state (conj board-path %1) opts) cells))]))
 
 (defn leader-boards 
-  "Finds list of [:players :boards] in global state and displays them.
-  This checks width and height of the display and displays the leader
-  boards horizontally if the width is less than height or vertically
-  otherwise."
+  "Finds list of [:players :boards] in global state and displays them
+  in horizontal row"
   [!state boards-path
-   & [{:keys [cell-width cell-height gutter-size font-size click-fn vertical?]
+   & [{:keys [cell-width cell-height gutter-size font-size click-fn]
        :as opts
        :or {cell-width  b/default-cell-width
             cell-height b/default-cell-height
             gutter-size b/default-gutter-size
-            font-size   b/default-font-size
-            vertical?   true}}]]
+            font-size   b/default-font-size}}]]
   (let [boards      (get-in @!state boards-path)
         board-paths (map-indexed #(conj boards-path %1 :board) boards)]
-    (if vertical?
-      [:div.container
-       [:div.row
-        [:div [:h3 "Leader Boards"]]]
-       (doall (for [path board-paths]
-                [:div.row {:style {:margin-bottom "5px"} 
-                           :key   (first (take-last 2 path))}
-                 (board !state path opts)]))]
-      [:div.container
+    [:div.container
+     
+     (when (not (empty? boards))
        [:div.row
         [:h3 "Leader Boards"]
         (doall (for [path board-paths]
                  [:div.pull-left 
                   {:style {:padding "5px"}
                    :key (first (take-last 2 path))}
-                  (board !state path opts)]))]]
-       )))
+                  (board !state path opts)]))])]
+    ))
 
 ;; /Reagent Components
