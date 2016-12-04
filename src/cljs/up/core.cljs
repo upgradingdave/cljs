@@ -17,6 +17,7 @@
    [up.passwd.dev            :as pwd]
    [up.person.dev            :as person]
    ;; needs work: [up.passwd.spec.dev     :as pass]
+   [up.reframe.dev           :as reframe]
    [up.timers.dev            :as timer]
    [up.tree.dev              :as tree]
    [up.todo.dev              :as todo]
@@ -36,7 +37,7 @@
   (timer/main)
   (cookies/main)
   (auth0/main)
-  )
+  (reframe/main))
 
 ;; This is used in :on-jsload in boot-reload configuration in
 ;; build.boot

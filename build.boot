@@ -20,8 +20,9 @@
    [com.cemerick/piggieback "0.2.1"  :scope "test"]
    [weasel                  "0.7.0"  :scope "test"]
    [devcards "0.2.1" :exclusions [cljsjs/react]]
-   [reagent  "0.5.1" :exclusions [cljsjs/react]]
-   [cljsjs/react-with-addons "0.14.7-0"]
+
+   [reagent "0.6.0" :exclusions [cljsjs/react]]
+   [cljsjs/react-with-addons "15.2.1-0"]
 
    ;; TODO: I forget how this works, but I thought tools.nrepl should
    ;; be configured by boot-dave ???
@@ -41,6 +42,8 @@
    [cljsjs/aws-sdk-js "2.2.41-2"]
    [cljsjs/auth0      "7.0.4-0"]
    [cljsjs/auth0-lock "10.4.0-0"]
+   [re-frame/re-frame "0.8.0"]
+   [re-frisk          "0.3.1"]
 
    ])
 
