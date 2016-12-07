@@ -19,7 +19,8 @@
 
    [com.cemerick/piggieback "0.2.1"  :scope "test"]
    [weasel                  "0.7.0"  :scope "test"]
-   [devcards "0.2.1" :exclusions [cljsjs/react]]
+   [devcards "0.2.1-7" :exclusions [cljsjs/react 
+                                    cljsjs/react-dom]]
 
    [reagent "0.6.0" :exclusions [cljsjs/react]]
    [cljsjs/react-with-addons "15.2.1-0"]
@@ -88,6 +89,12 @@
          :ids #{"public/js/compiled/devcards"})
    (target)))
 
+(deftask github
+  "Prod version of github experiment"
+  []
+  (cljs :compiler-options {:optimizations :advanced}
+        :ids #{"public/js/compiled/github"}))
+
 (deftask dev
   "Sets up environment for development"
   []
@@ -98,6 +105,7 @@
    (serve)
    (cider)
    (webworkers)
+   (github)
 
    (watch)
    (reload 
@@ -120,15 +128,3 @@
    (cljs :ids #{"public/js/bingo_dev"
                 "public/js/bingo"})))
 
-;; (deftask bingo
-;;   "Sets up environment for clojure bingo app"
-;;   []
-;;   (comp
-;;    (serve)
-;;    (cider)
-;;    (watch)
-;;    (reload 
-;;     :on-jsload 'up.bingo.app/reload
-;;     :ids #{"public/js/bingo"})
-;;    (cljs :ids #{"public/js/bingo"})
-;;    ))

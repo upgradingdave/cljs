@@ -5,6 +5,8 @@
    [up.auth0.dev             :as auth0]
    [up.cookies.dev           :as cookies]
    ;;removed: [up.bmr.dev               :as bmr]
+   [up.css.dev               :as css]
+   [up.github.dev            :as github]
    [up.health.dev            :as health]
    [up.fun.euler.lattice-dev :as lat]
    [up.fun.pcf-dev           :as pcf]
@@ -37,7 +39,9 @@
   (timer/main)
   (cookies/main)
   (auth0/main)
-  (reframe/main))
+  (reframe/main)
+  (css/main)
+  (github/main))
 
 ;; This is used in :on-jsload in boot-reload configuration in
 ;; build.boot
