@@ -9,7 +9,7 @@
                            reg-event-db 
                            reg-sub
                            reg-event-fx]]
-   [day8.re-frame.undo :as undo :refer [undoable]])
+   [day8.re-frame.undo :as undo :refer [undoable clear-history!]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 (def flip-move (r/adapt-react-class js/FlipMove))
@@ -21,7 +21,8 @@
   [s]
   (into (sorted-map)
         (for [[i c] (map-indexed vector s)]
-          [i {:value c}])))
+          [i {:value c
+              :id    i}])))
 
 (defn perm->str
   "convert perm datastructure into string"
@@ -42,14 +43,14 @@
 (defn clear-pivot-suffix [perm]
   (into (sorted-map) 
         (map (fn [[k v]] 
-               [k {:value (:value v)}]) perm)))
+               [k {:value (:value v)
+                   :id    (:id v)}]) perm)))
 
 (defn find-suffix 
   "The suffix is the right most index n where all indexes n+1
   decrease. Find the index where the suffix starts"
   [perm]
-  (let [keys     (keys perm)
-        reversed (reverse keys)
+  (let [reversed (reverse (keys perm))
         idx      (first reversed)
         xs       (rest reversed)]
     (loop [idx idx xs xs]
@@ -82,6 +83,7 @@
 (reg-sub ::suffix      (fn [db _] (::suffix db)))
 (reg-sub ::play?       (fn [db _] (::play? db)))
 (reg-sub ::done?       (fn [db _] (::done? db)))
+(reg-sub ::interval    (fn [db _] (::interval db)))
 
 ;; event handlers
 
@@ -101,7 +103,14 @@
                  ::play? false
                  ::done? false
                  ::step  (count steps)
-                 ::steps steps})))))
+                 ::steps steps
+                 ::interval 350})))))
+
+(reg-event-db
+ :purge-undos
+ (fn [db _]
+   (clear-history!)
+   db))
 
 (reg-event-db
  ::perm-input
@@ -123,7 +132,8 @@
      (if (<= suffix 0)
        ;; we're at the largest permutation!
        (-> db
-           (assoc-in [::done?] true))
+           (assoc-in [::done?] true)
+           (assoc-in [::play?] false))
        (-> db
            (assoc-in [::done?] false)
            (assoc-in [::perm suffix :suffix?] true)
@@ -161,8 +171,25 @@
   (let [n (inc curr)] (if (> n (dec size)) 0 n)))
 
 (reg-event-fx
- ::permutate
+ ::do-next
  (undoable)
+ (fn [cofx _]
+   (let [db        (get-in cofx [:db])
+         done?     (get-in db [::done?])
+         steps     (get-in db [::steps])
+         step-idx  (get-in db [::step])
+         next-idx  (next-step step-idx (count steps))
+         action    (get-in db [::steps next-idx])
+         interval  (get-in db [::interval])]
+     (if done?
+       {:dispatch []}
+       ;; else just dispatch next step
+       {:db (assoc-in (:db cofx) [::step] next-idx)
+        :dispatch [action]
+        :undo "next step"}))))
+
+(reg-event-fx
+ ::continue
  (fn [cofx _]
    (let [db        (get-in cofx [:db])
          play?     (get-in db [::play?] false)
@@ -171,23 +198,15 @@
          step-idx  (get-in db [::step])
          next-idx  (next-step step-idx (count steps))
          action    (get-in db [::steps next-idx])
-         interval  50]
-     ;; (js/console.log (str "play?: " play?))
-     ;; (js/console.log (str "step-idx: " step-idx))
-     ;; (js/console.log (str "next-idx: " next-idx))
-     ;; (js/console.log (str "action: " action))
-     (if done?
+         interval  (get-in db [::interval])]
+     (if (or (not play?) done?)
        {:dispatch []}
-       (if play?
-         ;; continuously dispatch every interval
-         {:db (assoc-in (:db cofx) [::step] next-idx)
-          :dispatch-later [{:ms (* interval 1) :dispatch [action]}
-                           {:ms (* interval 2) :dispatch [::permutate]}]
-          :undo "next step"}
-         ;; just dispatch next step
-         {:db (assoc-in (:db cofx) [::step] next-idx)
-          :dispatch [action]
-          :undo "next step"})))))
+       ;; continuously dispatch every interval
+       {:db (assoc-in (:db cofx) [::step] next-idx)
+        :dispatch-later [{:ms (* interval 1) :dispatch [action]}
+                         {:ms (* interval 2) :dispatch [::continue]}]
+        ;;:undo "next step"
+        }))))
 
 (reg-event-fx
  ::stop
@@ -198,7 +217,7 @@
  ::play
  (fn [cofx _]
    {:db (assoc-in (:db cofx) [::play?] true)
-    :dispatch [::permutate]}))
+    :dispatch [::continue]}))
 
 ;; components
 
@@ -209,47 +228,48 @@
        [:label "Enter a sequence of characters to start with"]
        [:input 
         {:class "form-control"
-         :style {:width "175px"}
+         :style {:width "275px"}
          :type "text"
          :value @v
          :on-change #(dispatch [::perm-input (.-value (.-target %))])}]])))
 
 (defn reset-btn []
-  (let [v (subscribe [::perm-input])]
+  (let [v     (subscribe [::perm-input])
+        play? (subscribe [::play?])]
     (fn []
-      [:div.btn.btn-primary 
-       {:on-click (fn [e] 
-                    (do
-                      (dispatch-sync [::initialize @v])
-                      (.preventDefault e)))}
-       "Reset"])))
+      (let [disabled? @play?]
+       [:div.btn.btn-primary 
+        {:on-click (fn [e] 
+                     (when (not disabled?)
+                       (do
+                         (dispatch [:purge-undos])
+                         (dispatch-sync [::initialize @v])
+                         (.preventDefault e))))
+         :disabled disabled?}
+         [:i.fa.fa-refresh {:title "Reset"}]]))))
 
 ;;https://www.nayuki.io/page/next-lexicographical-permutation-algorithm
-(defn box [_ idx value swap? pivot? suffix]
-  [:li
-    value])
-
 (defn permutation []
-  (let [v      (subscribe [::perm])
-        suffix (subscribe [::suffix])]
+  (let [v        (subscribe [::perm])
+        suffix   (subscribe [::suffix])
+        interval (subscribe [::interval])]
     (fn []
-      [:div {:style {:padding "20px 0 20px 0"}}
-       (let [suffix @suffix]
-         [flip-move {:style css/perm-container
-                     :type-name "div"
-                     :duration 750
-                     :easing "cubic-bezier(.12,.36,.14,1.2)"
-                     ;;:staggerDelayBy 200
-                     ;; :enter-animation "accordionHorizontal"
-                     ;; :leave-animation "accordionHorizontal"
-                     }
-          (map (fn [[idx {:keys [value swap? pivot?]}]]
-                 (vector :div {:key (str idx value)
-                              :style (css/perm-child 
-                                      swap? pivot?
-                                      (and suffix (>= idx suffix)))}
-                         value))
-               @v)])])))
+      (let [suffix @suffix]
+        [flip-move {:style css/perm-container
+                    :duration @interval
+                    :easing "cubic-bezier(0.6, -0.28, 0.735, 0.045)" ;;"linear"
+                    :staggerDelayBy 20
+                    :staggerDurationBy 20
+                    }
+         (map (fn [[idx {:keys [id value swap? pivot?]}]]
+                (vector :div.square 
+                        {:key (str id)
+                         :style (css/perm-child 
+                                 swap? pivot?
+                                 (and suffix (>= idx suffix)))
+                         }
+                        value))
+              @v)]))))
 
 (defn next-btn []
   (let [play? (subscribe [::play?])
@@ -258,56 +278,60 @@
       (let [disabled? (or @done? @play?)]
         [:div.btn.btn-primary 
          {:on-click (fn [e] 
-                      (if (not disabled?)
+                      (when (not disabled?)
                         (do
-                          (dispatch [::permutate])
+                          (dispatch [::do-next])
                           (.preventDefault e))))
           :disabled disabled?}
-         "Do Next Step"]))))
+         [:i.fa.fa-forward {:title "Next Step"}]]))))
 
 (defn undo-btn []
-  (let [play? (subscribe [::play?])
+  (let [play?  (subscribe [::play?])
+        done?  (subscribe [::done?])
         undos? (subscribe [:undos?])]
     (fn []
       (let [disabled? (or (not @undos?) @play?)]
         [:div.btn.btn-primary 
          {:on-click (fn [e] 
-                      (if (not disabled?)
+                      (when (not disabled?)
                         (do
                           (dispatch [:undo])
                           (.preventDefault e))))
           :disabled disabled?}
-         "Undo!"]))))
+         [:i.fa.fa-backward {:title "Undo"}]]))))
 
 (defn play-btn []
   (let [play? (subscribe [::play?])
         done? (subscribe [::done?])]
     (fn []
-      (let [disabled? (or @done? @play?)]
+      (let [disabled? @done?]
         [:div.btn.btn-primary 
          {:on-click (fn [e] 
-                      (do
-                        (if @play?
-                          (dispatch [::stop])
-                          (dispatch [::play]))
-                        (.preventDefault e)))}
+                      (when (not disabled?)
+                        (do
+                          (if @play?
+                            (dispatch-sync [::stop])
+                            (do 
+                              (dispatch [:purge-undos])
+                              (dispatch [::play])))
+                          (.preventDefault e))))
+          :disabled disabled?}
          (if @play?
-           "Stop!"
-           "Play!")]))))
+           [:i.fa.fa-stop {:title "Stop"}]
+           [:i.fa.fa-play {:title "Play"}])]))))
 
 (defn widget []
   [:div
    [perm-input]
-   [reset-btn]
-   [permutation]
-   [next-btn]
-   [undo-btn]
-   [play-btn]])
+   [:div.btn-group
+    [reset-btn]
+    [undo-btn]
+    [next-btn]
+    [play-btn]]
+   [permutation]])
 
 (defn main []
-  (dispatch-sync [::initialize "012345"])
-  ;;(dispatch [::permutate])
-  )
+  (dispatch-sync [::initialize "012345"]))
 
 (defn dom 
   "This is what bootstraps in advanced compilation"
@@ -316,5 +340,4 @@
     (do
       (main)
       (r/render-component [widget] node)
-      ;;(dispatch [::find-contributors])
-      )))
+      (dispatch [::play]))))

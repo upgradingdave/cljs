@@ -40,12 +40,14 @@
    [compojure "1.5.1"]
    [hiccup "1.0.5"]
 
-   [cljsjs/aws-sdk-js "2.2.41-2"]
-   [cljsjs/auth0      "7.0.4-0"]
-   [cljsjs/auth0-lock "10.4.0-0"]
-   [re-frame/re-frame "0.8.0"]
-   [re-frisk          "0.3.1"]
+   [cljsjs/aws-sdk-js      "2.2.41-2"]
+   [cljsjs/auth0           "7.0.4-0"]
+   [cljsjs/auth0-lock      "10.4.0-0"]
+   [cljsjs/react-flip-move "2.7.2-0"]
 
+   [re-frame/re-frame  "0.8.0"]
+   [day8.re-frame/undo "0.3.2"]
+   [re-frisk           "0.3.1"]
    ])
 
 (require '[adzerk.boot-cljs             :refer [cljs]]
@@ -95,6 +97,12 @@
   (cljs :compiler-options {:optimizations :advanced}
         :ids #{"public/js/compiled/github"}))
 
+(deftask permute
+  "Prod version of permutation demo"
+  []
+  (cljs :compiler-options {:optimizations :advanced}
+        :ids #{"public/js/compiled/permute"}))
+
 (deftask dev
   "Sets up environment for development"
   []
@@ -106,6 +114,7 @@
    (cider)
    (webworkers)
    (github)
+   (permute)
 
    (watch)
    (reload 

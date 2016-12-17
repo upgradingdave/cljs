@@ -26,46 +26,27 @@
    })
 
 (def perm-container 
-  {
-   :padding         0
-   :margin          0
-   :list-style      "none"
-
-   :border-top      "1px solid black"
-   :border-bottom   "1px solid black"
-   :border-left     "1px solid black"
-
-   :display         "flex"
-   ;; :display         "-webkit-flex"
-   ;; :display         "-webkit-box"
-   ;; :display         "-moz-box"
-   ;; :display         "-ms-flexbox"
-   
-   :flex-wrap       "flex-wrap"
-   :justify-content "space-around"
-   })
+  {:display "flex"
+   :flex-direction "row"
+   :flex-wrap "wrap"
+   :justify-content "flex-start" ;;"space-around"
+   :align-items "center"
+   :padding 0
+   :maring 0
+   :background-color "white"})
 
 (defn perm-child [swap? prefix? suffix?]
-  {:background-color (cond 
-                       swap?   (:purple colors)
-                       prefix? (:icon-green1 colors)
-                       suffix? (:icon-blue1  colors) 
-
-                       :else   (:light-blue2 colors))
-
-   :border-right     "1px solid black"
-
-   :padding "5px"
-   
-   :width  "200px" 
-   :height "100px"
-   :margin "auto"
-
-   :line-height "100px"
-   :color (:black2 colors)
-   :font-weight "bold"
-   :font-size "3em"
-   :text-align "center"
-
-   }
-)
+  (let [bg-color (cond 
+                   swap?   (:purple colors)
+                   prefix? (:icon-green1 colors)
+                   suffix? (:icon-blue1  colors) 
+                   :else   (:light-blue2 colors))]
+    {:height "80px"
+     :line-height "20px"
+     :margin "10px"
+     :padding "30px"
+     :text-align "center"
+     :font-size "2em"
+     :border-radius "8px"
+     :color (:black2 colors)
+     :background-color bg-color}))
