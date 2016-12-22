@@ -1,6 +1,11 @@
 (ns up.bingo.components
   (:require [up.bingo.css   :as css]
-            [up.bingo.core  :as b]))
+            [up.bingo.core  :as b]
+            [re-frame.core :refer [dispatch-sync
+                                   dispatch
+                                   subscribe
+                                   reg-event-db 
+                                   reg-sub]]))
 
 ;; Reagent Components
 
@@ -15,30 +20,43 @@
     (if (not marked)
       (swap! !state update-in path-to-cell (togglefn :marked)))))
 
+(reg-sub ::name (fn [db _] (::name db)))
+
+;; TODO namespace the keyword
+(reg-event-db                 
+  :mark-cell
+  (fn
+    [db [_ path-to-cell]]
+    (update-in db path-to-cell #(assoc % :marked true))))
+
 (defn cell 
-  [!state path-to-cell
-   & [{:keys [cell-width cell-height font-size gutter-size click-fn read-only] 
+  [& [{:keys [top left key value marked location
+              cell-width cell-height font-size gutter-size read-only] 
        :as opts
        :or {cell-width  b/default-cell-width
             cell-height b/default-cell-height
             font-size   b/default-font-size
             gutter-size b/default-gutter-size
-            read-only   true}}]]
-  (let [{:keys [top left key value marked]} (get-in @!state path-to-cell)]
-    [:div {:key key
-           :style (-> (css/cell-style cell-width cell-height font-size)
-                      (merge (if top (css/cell-pos top left 
-                                                   cell-width 
-                                                   cell-height 
-                                                   gutter-size
-                                                   read-only)))
-                      (merge (if marked (css/cell-marked))))
-           :on-click (fn [e] 
-                       (if (not read-only)
-                         (do
-                           (toggle-marked !state path-to-cell)
-                           (when click-fn (click-fn path-to-cell)))))}
-     value]))
+            read-only   true
+            value       "example"}}]]
+  [:div {:key key
+         :style (-> (css/cell-style cell-width cell-height font-size)
+                    (merge (css/read-only read-only))
+                    (merge (if top (css/cell-pos top left 
+                                                 cell-width 
+                                                 cell-height 
+                                                 gutter-size)))
+                    (merge (if marked (css/cell-marked))))
+         :on-click #(when location (dispatch location))}
+   value])
+
+(defn active-cell [key cell-location] 
+  (let [cells (subscribe cell-location)]
+    (fn [key]
+      [cell {:read-only false
+             :key key
+             :marked (get-in @cells [key :marked])
+             :location [:mark-cell (conj cell-location key)]}])))
 
 (defn board 
   [!state board-path 
@@ -51,7 +69,8 @@
   (let [cells (get-in @!state board-path)]
     [:div {:key (gensym) 
            :style (css/board-style cell-width cell-height gutter-size)}
-     (doall (map-indexed #(cell !state (conj board-path %1) opts) cells))]))
+     (doall (map-indexed #(cell nil nil nil nil nil ;;!state (conj board-path %1) opts
+                           ) cells))]))
 
 (defn leader-boards 
   "Finds list of [:players :boards] in global state and displays them

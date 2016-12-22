@@ -4,7 +4,10 @@
             [up.bingo.core       :as b]
             [up.bingo.components :as c]
             [up.env              :as env]
-            [cljs.core.async :refer [put! chan <! >! close!]]))
+            [cljs.core.async :refer [put! chan <! >! close!]]
+            [re-frisk.core :refer [enable-re-frisk!]]))
+
+(def app-db (r/atom {}))
 
 (defn app-container [!state path]
   (let [{:keys [width height]} (env/get-dimensions)]
@@ -15,13 +18,13 @@
       ]
      [:div.row 
       [:div 
-       (c/board !state [:bingo :board] 
-                (-> (b/calc-board-size)
-                    (assoc :read-only false)
-                    (assoc :click-fn 
-                           #(b/save-board! !state [:bingo] b/gameid
-                                           (get-in @!state [:bingo :board])
-                                           true))))]]
+       [c/board !state [:bingo :board] 
+        (-> (b/calc-board-size)
+            (assoc :read-only false)
+            (assoc :click-fn 
+                   #(b/save-board! !state [:bingo] b/gameid
+                                   (get-in @!state [:bingo :board])
+                                   true)))]]]
      [:div.row
       [c/leader-boards 
        !state [:bingo :leaders] 
@@ -32,8 +35,11 @@
 (defn main []
   (if-let [node (.getElementById js/document "bingo")]
     (do
+      
       (r/render-component [app-container !state] node)
-      (b/init! !state [:bingo] b/gameid))))
+      (enable-re-frisk!)
+      ;;(b/init! !state [:bingo] b/gameid)
+      )))
 
 (defn reload []
   (b/init! !state [:bingo] b/gameid))

@@ -66,13 +66,15 @@
    :transform         "translate3d(0,0,0)"
    })
 
-(defn cell-pos [top left cell-width cell-height gutter-size read-only]
+(defn read-only [read-only]
+  {:cursor     (if (not read-only) "pointer")})
+
+(defn cell-pos [top left cell-width cell-height gutter-size]
   {:position   "absolute"
    :top        (str (+ (* top cell-height) 
                  (* (inc top) gutter-size)) "px")
    :left       (str (+ (* left cell-width)  
                  (* (inc left) gutter-size)) "px")
-   :cursor     (if (not read-only) "pointer")
    })
 
 (defn cell-marked [] 
@@ -90,34 +92,5 @@
    :padding-bottom "2px"
    :background-color "rgba(86,61,124,.15)"
    :border "1px solid rgba(86,61,124,.2)"})
-
-(defn pending-item-style [transition-in
-                          transition-out]
-  (str 
-   ".pending-enter {
-      opacity: 1;
-    }
-
-    .pending-enter-active {
-      opacity: 0.1;
-      -moz-transition: all "    transition-in "s ease-in-out;
-      -webkit-transition: all " transition-in "s ease-in-out;
-      -ms-transition: all "     transition-in "s ease-in-out;
-      -o-transition: all "      transition-in "s ease-in-out;
-      transition: all "         transition-in "s ease-in-out;
-    }
-
-    .pending-leave {
-      opacity: 1;
-    }
-
-    .pending-leave-active {
-      opacity: 0.1;
-      -moz-transition: all "    transition-out "s ease-in-out;
-      -webkit-transition: all " transition-out "s ease-in-out;
-      -ms-transition: all "     transition-out "s ease-in-out;
-      -o-transition: all "      transition-out "s ease-in-out;
-      transition: all "         transition-out "s ease-in-out;
-  }"))
 
 ;; /Styles

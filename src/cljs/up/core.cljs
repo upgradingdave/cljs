@@ -3,6 +3,7 @@
    [devcards.core :as dc :include-macros true]
    [up.alerts.dev            :as alerts]
    [up.auth0.dev             :as auth0]
+   [up.bingo.dev.components  :as bingo1]
    [up.cookies.dev           :as cookies]
    ;;removed: [up.bmr.dev               :as bmr]
    [up.css.dev               :as css]
@@ -17,6 +18,7 @@
    [up.notify.dev            :as notify]
    [up.nutrition.dev         :as nutrition]
    [up.passwd.dev            :as pwd]
+   [up.permute.dev           :as permute]
    [up.person.dev            :as person]
    ;; needs work: [up.passwd.spec.dev     :as pass]
    [up.reframe.dev           :as reframe]
@@ -41,7 +43,8 @@
   (auth0/main)
   (reframe/main)
   (css/main)
-  (github/main))
+  (github/main)
+  (permute/main))
 
 ;; This is used in :on-jsload in boot-reload configuration in
 ;; build.boot

@@ -32,7 +32,7 @@
    [pandeiro/boot-http      "0.6.3"  :scope "test"]
 
    [com.andrewmcveigh/cljs-time "0.4.0"]
-   [upgradingdave/password      "0.2.2"]
+   ;;[upgradingdave/password      "0.2.2"]
 
    [cljsjs/exif "2.1.1-1"]
    [cljsjs/ical "1.2.1-1"]

@@ -17,6 +17,7 @@
 
 (def db (js/AWS.DynamoDB.))
 
+;;TODO moved to common
 (defn keywordize [data] (w/keywordize-keys (js->clj data)))
 
 (defn- val->db 
@@ -60,11 +61,13 @@
                               (first r)
                               (into {} r))) x)) m)))
 
+;; TODO moved to common
 (defn empty-or-nil? [data]
   (or (nil? data)
       (undefined? data)
       (empty? (js->clj data))))
 
+;; TODO moved to common
 (defn <run
   "Inspired by http://www.lispcast.com/core-async-code-style"
   [f & args]

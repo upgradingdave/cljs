@@ -15,12 +15,15 @@
 
 (def data  (r/atom {}))
 
+;; TODO moved to common
 (defn handler [reply]
   (swap! data assoc-in [:result] reply))
 
+;; TODO moved to common
 (def xhr (doto (goog.net.XhrIo. (CorsXmlHttpFactory.))
            (.listen ge/COMPLETE handler)))
 
+;; TODO moved to common
 (defn send [url]
   (.send xhr url))
 
